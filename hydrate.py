@@ -47,6 +47,12 @@ if __name__ == '__main__':
         default='hydrated-cluster',
         help='Name of the main component (default:hydrated-cluster)')
     parser.add_argument(
+        '-k', '--kubeconfig',
+        action='store'
+        default='kubeconfig',
+        help='Kubeconfig file for the cluster (default:kubeconfig)',
+        metavar='KUBECONFIG')
+    parser.add_argument(
         '-o', '--output',
         action='store',
         default=os.getcwd(),
