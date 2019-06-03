@@ -51,7 +51,7 @@ if __name__ == '__main__':
         action='store',
         default=os.getcwd(),
         help='Specify path of the generated component.yaml.',
-        metavar='path')
+        metavar='PATH')
     parser.add_argument(
         '-v', '--verbose',
         action='store_true',
