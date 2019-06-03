@@ -45,17 +45,17 @@ if __name__ == '__main__':
         '-n', '--name',
         action='store',
         default='hydrated-cluster',
-        help='Specify the name of the main component.')
+        help='Name of the main component (default:hydrated-cluster)')
     parser.add_argument(
         '-o', '--output',
         action='store',
         default=os.getcwd(),
-        help='Specify path of the generated component.yaml.',
+        help='Output path for the generated component.yaml.',
         metavar='PATH')
     parser.add_argument(
         '-v', '--verbose',
         action='store_true',
-        help='Print more output.')
+        help='Verbose output logs.')
     parser.add_argument(
         '-d', '--dry-run',
         action='store_true',
