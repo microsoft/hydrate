@@ -5,7 +5,6 @@ Functions:
     - get_deployments_for_all_namespaces()
 """
 from kubernetes import client, config
-from ruamel.yaml import YAML
 import argparse
 import os
 
@@ -37,27 +36,32 @@ def get_deployments_for_all_namespaces():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=
-        'Generate a component.yaml file for your cluster.')
-    parser.add_argument('run',
+    parser = argparse.ArgumentParser(
+        description='Generate a component.yaml file for your cluster.')
+    parser.add_argument(
+        'run',
         help='Generate component.yaml for current configuration.')
-    parser.add_argument('-n', '--name',
+    parser.add_argument(
+        '-n', '--name',
         action='store',
         default='hydrated-cluster',
         help='Specify the name of the main component.')
-    parser.add_argument('-o', '--output',
+    parser.add_argument(
+        '-o', '--output',
         action='store',
         default=os.getcwd(),
         help='Specify path of the generated component.yaml.',
         metavar='path')
-    parser.add_argument('-v', '--verbose',
+    parser.add_argument(
+        '-v', '--verbose',
         action='store_true',
         help='Print more output.')
-    parser.add_argument('-d', '--dry-run',
+    parser.add_argument(
+        '-d', '--dry-run',
         action='store_true',
         help='Print component.yaml to the terminal.')
     args = parser.parse_args()
-    
+
     # Define verbose_print as print if -v, o.w. do nothing
     verbose_print = print if args.verbose else lambda *a, **k: None
     verbose_print("Printing verbosely...")
