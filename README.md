@@ -9,15 +9,13 @@ Include a "kubeconfig" file for your cluster in the same directory as hydrate.py
 python hydrate.py [-h] [-n NAME] [-o path] [-v] [-d] run
 ```
 
-Generate a component.yaml file for your cluster.
-
-Positional arguments:
+### Positional arguments:
 
 Arg | Usage
 --- | ---
 run | Generate component.yaml for current configuration
 
-Optional arguments:
+### Optional arguments:
 
 Arg | Usage
 --- | ---
