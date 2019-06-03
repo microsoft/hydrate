@@ -19,8 +19,9 @@ run | Generate component.yaml for current configuration
 
 Arg | Usage
 --- | ---
--h, --help | show this help message and exit
--n NAME, --name NAME | Specify the name of the main component.
--o path, --output path | Specify path of the generated component.yaml.
--v, --verbose | Print more output.
+-h, --help | Show the help message and exit
+-n NAME, --name NAME | Name of the main component (default:hydrated-cluster)
+-k FILE, --kubeconfig FILE | Kubeconfig file for the cluster (default:kubeconfig)
+-o PATH, --output PATH | Output path for the generated component.yaml.
+-v, --verbose | Verbose output logs.
 -d, --dry-run | Print component.yaml to the terminal.
