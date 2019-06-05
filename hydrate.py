@@ -5,6 +5,7 @@ Functions:
     - get_deployments_for_all_namespaces()
 """
 from kubernetes import client, config
+from github import Github
 import argparse
 import os
 
@@ -33,6 +34,15 @@ def get_deployments_for_all_namespaces():
         print("\tImages:")
         for container in i.spec.template.spec.containers:
             print("\t%s" % (container.image))
+
+
+def connect_to_cluster():
+    """Connects to the cluster, returns the api object."""
+    config.load_kube_config(args.kubeconfig)
+    print("Connecting to Cluster API")
+    api = client.AppsV1Api()
+    print("Connected!")
+    return api
 
 
 if __name__ == '__main__':
@@ -72,15 +82,11 @@ if __name__ == '__main__':
     verbose_print = print if args.verbose else lambda *a, **k: None
     verbose_print("Printing verbosely...")
 
-    config.load_kube_config(args.kubeconfig)
+    with open('apikey') as f:
+        api_key = f.read()
+    g = Github(api_key)
     
-    print("Connecting to Cluster API")
-    api = client.AppsV1Api()
-    print("Connected!")
-
-    with open('deployments.json','w+') as out:
-        ret = api.list_deployment_for_all_namespaces(watch=False)
-        for i in ret.items:
-            out.write(str(i))
-    #get_pods_for_all_namespaces()
-    #get_deployments_for_all_namespaces()
+    print("Searching...")
+    repositories = g.search_repositories(query="fabrikate in:name", sort='stars')
+    for repo in repositories:
+        print(repo)
