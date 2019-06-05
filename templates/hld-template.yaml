@@ -1,0 +1,14 @@
+name:
+type:
+source:
+method:
+path:
+version:
+branch:
+hooks:
+  before-install:
+  before-generate:
+  after-install:
+  after-generate:
+repositories:
+subcomponents:
