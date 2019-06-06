@@ -5,7 +5,7 @@ Functions:
     - get_deployments_for_all_namespaces()
 """
 from kubernetes import client, config
-from github import Github
+from ruamel.yaml import YAML
 import argparse
 import os
 
@@ -82,11 +82,4 @@ if __name__ == '__main__':
     verbose_print = print if args.verbose else lambda *a, **k: None
     verbose_print("Printing verbosely...")
 
-    with open('apikey') as f:
-        api_key = f.read()
-    g = Github(api_key)
     
-    print("Searching...")
-    repositories = g.search_repositories(query="fabrikate in:name", sort='stars')
-    for repo in repositories:
-        print(repo)
