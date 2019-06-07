@@ -1,48 +1,43 @@
 """Hydrate generates a high level description of your cluster.
 
 Functions:
-    - get_pods_for_all_namespaces()
-    - get_deployments_for_all_namespaces()
+    - main()
 """
-from kubernetes import client, config
-from ruamel.yaml import YAML
 import argparse
 import os
+from cluster import Cluster
+from hld import Component, generate_HLD
 
 
-def get_pods_for_all_namespaces():
-    """Print all the pods to the terminal."""
-    v1 = client.CoreV1Api()
-    print('Listing pods with their IPs:')
-    ret = v1.list_pod_for_all_namespaces(watch=False)
-    for i in ret.items:
-        print("%s\t%s\t%s" % (i.status.pod_ip,
-                              i.metadata.namespace,
-                              i.metadata.name))
+def word_counts(dict_list, key):
+    """Count the first word of each dict[key] in the list.
+
+    Args:
+        dict_list: List of dictionaries
+        key: Used to obtain the values from each dictionary
+
+    Returns:
+        dict(key:word, value:count)
+
+    """
+    ret_count = dict()
+    for item in dict_list:
+        words = item[key].split("-")
+        ret_count[words[0]] = ret_count.get(words[0], 0) + 1
+    return ret_count
 
 
-def get_deployments_for_all_namespaces():
-    """Print all the deployments and their conatiner images to the terminal."""
-    api = client.AppsV1Api()
-    print('Listing deployments:')
-    print('Namespace\tName\tReplicas')
-    ret = api.list_deployment_for_all_namespaces(watch=False)
-    for i in ret.items:
-        print("%s\t%s\t%s" % (i.metadata.namespace,
-                              i.metadata.name,
-                              i.spec.replicas))
-        print("\tImages:")
-        for container in i.spec.template.spec.containers:
-            print("\t%s" % (container.image))
+def sort_dict_by_value(d):
+    """Sorts a dictionary by value.
 
+    Args:
+        d: Dictionary
 
-def connect_to_cluster():
-    """Connects to the cluster, returns the api object."""
-    config.load_kube_config(args.kubeconfig)
-    print("Connecting to Cluster API")
-    api = client.AppsV1Api()
-    print("Connected!")
-    return api
+    Returns:
+        list: List of (key, value) sorted by value in descending order
+
+    """
+    return [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)]
 
 
 if __name__ == '__main__':
@@ -82,4 +77,27 @@ if __name__ == '__main__':
     verbose_print = print if args.verbose else lambda *a, **k: None
     verbose_print("Printing verbosely...")
 
-    
+    # Connect to Cluster
+    my_cluster = Cluster(args.kubeconfig)
+    deployments = my_cluster.get_deployments_for_all_namespaces()
+    pods = my_cluster.get_pods_for_all_namespaces()
+
+    # Create Component
+    my_component = Component(args.name)
+
+    # Get first word counts
+    dep_counts = word_counts(deployments, "name")
+    pod_counts = word_counts(pods, "name")
+
+    # Sort the word counts
+    sorted_deps = sort_dict_by_value(dep_counts)
+    sorted_pods = sort_dict_by_value(pod_counts)
+
+    sub_list = []
+    for each in sorted_pods:
+        sub_list.append(Component(each[0]))
+
+    my_component.subcomponents = sub_list
+
+    with open("component.yaml", "w") as of:
+        generate_HLD(my_component, of)
