@@ -17,14 +17,14 @@ def count_first_word(dict_list, key):
         key: Used to obtain the values from each dictionary
 
     Returns:
-        dict(key:word, value:count)
+        dict(key:word, value:count) sorted by value desc. order
 
     """
     ret_count = dict()
     for item in dict_list:
         words = item[key].split("-")
         ret_count[words[0]] = ret_count.get(words[0], 0) + 1
-    return ret_count
+    return sort_dict_by_value(ret_count)
 
 
 def sort_dict_by_value(d):
@@ -91,15 +91,10 @@ if __name__ == '__main__':
     dep_counts = count_first_word(deployments, "name")
     pod_counts = count_first_word(pods, "name")
 
-    # Sort the word counts
-    verbose_print("Sorting the word counts...")
-    sorted_deps = sort_dict_by_value(dep_counts)
-    sorted_pods = sort_dict_by_value(pod_counts)
-
     # Create list of subcomponents
     verbose_print("Creating the list of subcomponents...")
     sub_list = []
-    for each in sorted_pods:
+    for each in pod_counts:
         sub_list.append(Component(each[0]))
 
     # Delete None attributes
