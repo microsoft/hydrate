@@ -1,12 +1,12 @@
 """Use to construct the HLD from given information."""
 from copy import deepcopy
-from collections import OrderedDict
-from ruamel.yaml import YAML, representer
+from ruamel.yaml import YAML
 yaml = YAML()
 
 
 class Component():
     """Hold the information for fabrikate High-Level Deployment(HLD)."""
+
     def __init__(self, name, generator="static", method="git"):
         """Instantiate a Component object.
 
@@ -28,29 +28,29 @@ class Component():
         self.subcomponents = None
 
     # How the class is represented in yaml
-    yaml_tag= u'Component'
+    yaml_tag = u'Component'
 
     def asdict(self):
-        """Return dict of Component"""
+        """Return dict of Component."""
         d = {}
         try:
             if self.subcomponents:
-                d = {key:value for key,value in self.__dict__.items() if key != "subcomponents"}
+                d = {key: value for key, value in self.__dict__.items()
+                     if key != "subcomponents"}
                 d["subcomponents"] = []
                 for subcomponent in self.subcomponents:
                     d["subcomponents"].append(subcomponent.asdict())
-            
-        except AttributeError as e:
-            # verbose_print(e)
-            d = {key:value for key,value in self.__dict__.items()}
+
+        except AttributeError:
+            d = {key: value for key, value in self.__dict__.items()}
         return d
 
     def delete_none_attrs(self):
-        """Removes attributes with value of None."""
+        """Remove attributes with value of None."""
         attr_dict = deepcopy(self.__dict__)
 
         for key, value in attr_dict.items():
-            if value == None:
+            if value is None:
                 delattr(self, key)
 
     def prep(self):
