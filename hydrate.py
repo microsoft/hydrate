@@ -78,26 +78,39 @@ if __name__ == '__main__':
     verbose_print("Printing verbosely...")
 
     # Connect to Cluster
+    verbose_print("Connecting to cluster...")
     my_cluster = Cluster(args.kubeconfig)
+    verbose_print("Connected!")
     deployments = my_cluster.get_deployments_for_all_namespaces()
     pods = my_cluster.get_pods_for_all_namespaces()
 
     # Create Component
+    verbose_print("Creating Component object...")
     my_component = Component(args.name)
 
     # Get first word counts
+    verbose_print("Getting first word counts...")
     dep_counts = word_counts(deployments, "name")
     pod_counts = word_counts(pods, "name")
 
     # Sort the word counts
+    verbose_print("Sorting the word counts...")
     sorted_deps = sort_dict_by_value(dep_counts)
     sorted_pods = sort_dict_by_value(pod_counts)
 
+    # Create list of subcomponents
+    verbose_print("Creating the list of subcomponents...")
     sub_list = []
     for each in sorted_pods:
         sub_list.append(Component(each[0]))
 
+    # Delete None attributes
+    verbose_print("Deleting None attributes from subcomponents...")
+    for sub in sub_list:
+        sub.delete_none_attrs()
+
     my_component.subcomponents = sub_list
 
+    verbose_print("Writing component.yaml...")
     with open("component.yaml", "w") as of:
         generate_HLD(my_component, of)

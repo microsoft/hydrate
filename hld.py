@@ -1,5 +1,7 @@
 """Use to construct the HLD from given information."""
-from ruamel.yaml import YAML
+from copy import deepcopy
+from collections import OrderedDict
+from ruamel.yaml import YAML, representer
 yaml = YAML()
 
 
@@ -14,96 +16,46 @@ class Component():
             method: string type of retrieval (default:git)
 
         """
-        self._name = name
-        self._generator = None
-        self._source = None
-        self._method = method
-        self._path = None
-        self._version = None
-        self._branch = None
-        self._hooks = None
-        self._repositories = None
-        self._subcomponents = None
+        self.name = name
+        self.generator = generator
+        self.source = None
+        self.method = method
+        self.path = None
+        self.version = None
+        self.branch = None
+        self.hooks = None
+        self.repositories = None
+        self.subcomponents = None
 
-    @property
-    def name(self):
-        return self._name
+    # How the class is represented in yaml
+    yaml_tag= u'Component'
 
-    @property
-    def generator(self):
-        return self._generator
+    def asdict(self):
+        """Return dict of Component"""
+        d = {}
+        try:
+            if self.subcomponents:
+                d = {key:value for key,value in self.__dict__.items() if key != "subcomponents"}
+                d["subcomponents"] = []
+                for subcomponent in self.subcomponents:
+                    d["subcomponents"].append(subcomponent.asdict())
+            
+        except AttributeError as e:
+            # verbose_print(e)
+            d = {key:value for key,value in self.__dict__.items()}
+        return d
 
-    @property
-    def source(self):
-        return self._source
+    def delete_none_attrs(self):
+        """Removes attributes with value of None."""
+        attr_dict = deepcopy(self.__dict__)
 
-    @property
-    def method(self):
-        return self._method
+        for key, value in attr_dict.items():
+            if value == None:
+                delattr(self, key)
 
-    @property
-    def path(self):
-        return self._path
-
-    @property
-    def version(self):
-        return self._version
-
-    @property
-    def branch(self):
-        return self._branch
-
-    @property
-    def hooks(self):
-        return self._hooks
-
-    @property
-    def repositories(self):
-        return self._repositories
-
-    @property
-    def subcomponents(self):
-        return self._subcomponents
-
-    @name.setter
-    def name(self, name):
-        self._name = name
-
-    @generator.setter
-    def generator(self, generator):
-        self._generator = generator
-
-    @source.setter
-    def source(self, source):
-        self._source = source
-
-    @method.setter
-    def method(self, method):
-        self._method = method
-
-    @path.setter
-    def path(self, path):
-        self._path = path
-
-    @version.setter
-    def version(self, version):
-        self._version = version
-
-    @branch.setter
-    def branch(self, branch):
-        self._branch = branch
-
-    @hooks.setter
-    def hooks(self, hooks):
-        self._hooks = hooks
-
-    @repositories.setter
-    def repositories(self, repositories):
-        self._repositories = repositories
-
-    @subcomponents.setter
-    def subcomponents(self, subcomponents):
-        self._subcomponents = subcomponents
+    def prep(self):
+        """Prep the object for yaml output."""
+        pass
 
 
 def generate_HLD(component, output):
@@ -114,5 +66,8 @@ def generate_HLD(component, output):
         output: filestream
 
     """
-    yaml.register_class(Component)
-    yaml.dump(component, output)
+    component.delete_none_attrs()
+    yaml.indent(mapping=2, sequence=4, offset=2)
+    d = component.asdict()
+
+    yaml.dump(d, output)

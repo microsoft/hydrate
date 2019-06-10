@@ -20,10 +20,8 @@ class Cluster():
     def connect_to_cluster(self):
         """Connect to the cluster. Set API attributes."""
         config.load_kube_config(self.kubeconfig)
-        print("Connecting to Cluster API")
         self.apps_v1_api = client.AppsV1Api()
         self.core_v1_api = client.CoreV1Api()
-        print("Connected!")
 
     def get_pods_for_all_namespaces(self):
         """Return list of dicts of pod info.
