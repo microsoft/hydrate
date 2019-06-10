@@ -80,27 +80,25 @@ if __name__ == '__main__':
     verbose_print("Connecting to cluster...")
     my_cluster = Cluster(args.kubeconfig)
     verbose_print("Connected!")
+
+    verbose_print("Collecting information from the cluster...")
     deployments = my_cluster.get_deployments_for_all_namespaces()
     pods = my_cluster.get_pods_for_all_namespaces()
 
     verbose_print("Creating Component object...")
     my_component = Component(args.name)
 
-    # Get first word counts
     verbose_print("Getting first word counts...")
     dep_counts = count_first_word(deployments, "name")
     pod_counts = count_first_word(pods, "name")
 
-    # Create list of subcomponents
     verbose_print("Creating the list of subcomponents...")
+    verbose_print("Deleting None attributes from subcomponents...")
     sub_list = []
     for each in pod_counts:
-        sub_list.append(Component(each[0]))
-
-    # Delete None attributes
-    verbose_print("Deleting None attributes from subcomponents...")
-    for sub in sub_list:
-        sub.delete_none_attrs()
+        s = Component(each[0])
+        s.delete_none_attrs()
+        sub_list.append(s)
 
     my_component.subcomponents = sub_list
 
