@@ -9,7 +9,7 @@ from cluster import Cluster
 from hld import Component, generate_HLD
 
 
-def word_counts(dict_list, key):
+def count_first_word(dict_list, key):
     """Count the first word of each dict[key] in the list.
 
     Args:
@@ -77,21 +77,19 @@ if __name__ == '__main__':
     verbose_print = print if args.verbose else lambda *a, **k: None
     verbose_print("Printing verbosely...")
 
-    # Connect to Cluster
     verbose_print("Connecting to cluster...")
     my_cluster = Cluster(args.kubeconfig)
     verbose_print("Connected!")
     deployments = my_cluster.get_deployments_for_all_namespaces()
     pods = my_cluster.get_pods_for_all_namespaces()
 
-    # Create Component
     verbose_print("Creating Component object...")
     my_component = Component(args.name)
 
     # Get first word counts
     verbose_print("Getting first word counts...")
-    dep_counts = word_counts(deployments, "name")
-    pod_counts = word_counts(pods, "name")
+    dep_counts = count_first_word(deployments, "name")
+    pod_counts = count_first_word(pods, "name")
 
     # Sort the word counts
     verbose_print("Sorting the word counts...")

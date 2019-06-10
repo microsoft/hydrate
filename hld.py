@@ -32,7 +32,7 @@ class Component():
 
     def asdict(self):
         """Return dict of Component."""
-        d = {}
+        d = dict()
         try:
             if self.subcomponents:
                 d = {key: value for key, value in self.__dict__.items()

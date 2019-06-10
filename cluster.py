@@ -33,7 +33,7 @@ class Cluster():
         pod_list = []
         ret = self.core_v1_api.list_pod_for_all_namespaces(watch=False)
         for i in ret.items:
-            d = {}
+            d = dict()
             d["ip"] = i.status.pod_ip
             d["name"] = i.metadata.name
             d["namespace"] = i.metadata.namespace
@@ -51,7 +51,7 @@ class Cluster():
         deployment_list = []
         ret = self.apps_v1_api.list_deployment_for_all_namespaces(watch=False)
         for i in ret.items:
-            d = {}
+            d = dict()
             d["name"] = i.metadata.name
             d["namespace"] = i.metadata.namespace
             d["replicas"] = i.spec.replicas
