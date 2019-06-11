@@ -2,3 +2,4 @@
 apikey
 kubeconfig*
 tmp
+__pycache__
