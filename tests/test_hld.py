@@ -1,3 +1,4 @@
+"""Test suite for hld.py."""
 import pytest
 import io
 from hydrate.hld import Component
@@ -14,5 +15,5 @@ exp_str = """name: Test-Component
                          [(tst_component, str_stream, exp_str)])
 def test_generate_HLD(component, output, expected):
     """Test generate_HLD function."""
-    generate_HLD(component, output) 
+    generate_HLD(component, output)
     str_stream == expected
