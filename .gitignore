@@ -1,5 +1,4 @@
 .gitcredentials
 apikey
 kubeconfig*
-*.yaml
-*.json
+tmp
