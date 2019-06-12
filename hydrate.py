@@ -5,8 +5,11 @@ Functions:
 """
 import argparse
 import os
-from cluster import Cluster
-from hld import Component, generate_HLD
+from hydrate.cluster import Cluster
+from hydrate.hld import Component, generate_HLD
+
+curr_path = os.path.dirname(__file__)
+tmp_path = os.path.relpath('tmp', curr_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -22,8 +25,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '-k', '--kubeconfig',
         action='store',
-        default='kubeconfig',
-        help='Kubeconfig file for the cluster (default:kubeconfig)',
+        default=os.path.join(tmp_path, 'kubeconfig'),
+        help='Kubeconfig file for the cluster (default:tmp/kubeconfig)',
         metavar='FILE')
     parser.add_argument(
         '-o', '--output',
@@ -50,7 +53,7 @@ if __name__ == '__main__':
     verbose_print("Connected!")
 
     verbose_print("Collecting information from the cluster...")
-    components = Cluster.get_components()
+    components = my_cluster.get_components()
 
     verbose_print("Creating Component object...")
     my_component = Component(args.name)
