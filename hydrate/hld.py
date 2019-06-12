@@ -1,4 +1,4 @@
-"""Use to construct the HLD from given information."""
+"""Use to construct the High-Level Deployment."""
 from copy import deepcopy
 from ruamel.yaml import YAML
 yaml = YAML()

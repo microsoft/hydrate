@@ -5,40 +5,11 @@ Functions:
 """
 import argparse
 import os
-from cluster import Cluster
-from hld import Component, generate_HLD
+from hydrate.cluster import Cluster
+from hydrate.hld import Component, generate_HLD
 
-
-def count_first_word(dict_list, key):
-    """Count the first word of each dict[key] in the list.
-
-    Args:
-        dict_list: List of dictionaries
-        key: Used to obtain the values from each dictionary
-
-    Returns:
-        dict(key:word, value:count) sorted by value desc. order
-
-    """
-    ret_count = dict()
-    for item in dict_list:
-        words = item[key].split("-")
-        ret_count[words[0]] = ret_count.get(words[0], 0) + 1
-    return sort_dict_by_value(ret_count)
-
-
-def sort_dict_by_value(d):
-    """Sorts a dictionary by value.
-
-    Args:
-        d: Dictionary
-
-    Returns:
-        list: List of (key, value) sorted by value in descending order
-
-    """
-    return [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)]
-
+curr_path = os.path.dirname(__file__)
+tmp_path = os.path.relpath('tmp', curr_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -54,8 +25,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '-k', '--kubeconfig',
         action='store',
-        default='kubeconfig',
-        help='Kubeconfig file for the cluster (default:kubeconfig)',
+        default=os.path.join(tmp_path, 'kubeconfig'),
+        help='Kubeconfig file for the cluster (default:tmp/kubeconfig)',
         metavar='FILE')
     parser.add_argument(
         '-o', '--output',
@@ -82,21 +53,15 @@ if __name__ == '__main__':
     verbose_print("Connected!")
 
     verbose_print("Collecting information from the cluster...")
-    deployments = my_cluster.get_deployments_for_all_namespaces()
-    pods = my_cluster.get_pods_for_all_namespaces()
+    components = my_cluster.get_components()
 
     verbose_print("Creating Component object...")
     my_component = Component(args.name)
 
-    verbose_print("Getting first word counts...")
-    dep_counts = count_first_word(deployments, "name")
-    pod_counts = count_first_word(pods, "name")
-
     verbose_print("Creating the list of subcomponents...")
-    verbose_print("Deleting None attributes from subcomponents...")
     sub_list = []
-    for each in pod_counts:
-        s = Component(each[0])
+    for component in components:
+        s = Component(component[0])
         s.delete_none_attrs()
         sub_list.append(s)
 
@@ -105,3 +70,4 @@ if __name__ == '__main__':
     verbose_print("Writing component.yaml...")
     with open("component.yaml", "w") as of:
         generate_HLD(my_component, of)
+
