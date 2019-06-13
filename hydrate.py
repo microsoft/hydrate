@@ -5,6 +5,7 @@ Functions:
 """
 import argparse
 import os
+import sys
 from hydrate.cluster import Cluster
 from hydrate.hld import Component, generate_HLD
 
@@ -61,13 +62,24 @@ if __name__ == '__main__':
     verbose_print("Creating the list of subcomponents...")
     sub_list = []
     for component in components:
-        s = Component(component[0])
+        s = Component(component)
         s.delete_none_attrs()
         sub_list.append(s)
 
     my_component.subcomponents = sub_list
 
-    verbose_print("Writing component.yaml...")
-    with open("component.yaml", "w") as of:
-        generate_HLD(my_component, of)
+    verbose_print("Writing HLD...")
 
+    if args.dry_run:
+        verbose_print("Writing component.yaml to terminal...")
+        generate_HLD(my_component, sys.stdout)
+    else:
+        if args.output:
+            verbose_print("Writing component.yaml to {}.".format(args.output))
+            output = os.path.join(args.output, "component.yaml")
+            with open(output, "w") as of:
+                generate_HLD(my_component, of)
+        else:
+            verbose_print("Writing to component.yaml...")
+            with open("component.yaml", "w") as of:
+                generate_HLD(my_component, of)
