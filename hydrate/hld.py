@@ -7,7 +7,8 @@ yaml = YAML()
 class Component():
     """Hold the information for fabrikate High-Level Deployment(HLD)."""
 
-    def __init__(self, name, generator="static", method="git"):
+    def __init__(self, name, generator="static", 
+                 source="<source repository url>", method="git"):
         """Instantiate a Component object.
 
         Args:
@@ -18,7 +19,7 @@ class Component():
         """
         self.name = name
         self.generator = generator
-        self.source = None
+        self.source = source
         self.method = method
         self.path = None
         self.version = None
