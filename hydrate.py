@@ -61,7 +61,7 @@ if __name__ == '__main__':
     verbose_print("Creating the list of subcomponents...")
     sub_list = []
     for component in components:
-        s = Component(component[0])
+        s = Component(component)
         s.delete_none_attrs()
         sub_list.append(s)
 

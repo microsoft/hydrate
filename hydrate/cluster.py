@@ -15,6 +15,7 @@ class Cluster():
         self.kubeconfig = kubeconfig
         self.apps_v1_api = None
         self.core_v1_api = None
+        self.namespaced_pods = {}
         self.connect_to_cluster()
 
     def connect_to_cluster(self):
@@ -24,18 +25,54 @@ class Cluster():
         self.apps_v1_api = client.AppsV1Api()
         self.core_v1_api = client.CoreV1Api()
 
+    def get_namespaces(self):
+        """Query the cluster for namespaces."""
+        ret = self.core_v1_api.list_namespace()
+        l = []
+        for i in ret.items:
+            l.append(i.metadata.name)
+        return l
+
+    def get_namespaced_pods(self, namespace):
+        """Store the list of pods in the given namespace in self.namespaced_pods."""
+        if namespace in self.namespaced_pods:
+            return self.namespaced_pods[namespace]
+        else:
+            namespaced_pods = self.core_v1_api.list_namespaced_pod(namespace)
+            pod_list = []
+            for i in namespaced_pods.items:
+                pod_list.append(i.metadata.name)
+            self.namespaced_pods[namespace] = pod_list
+            return pod_list
+
+    def remove_defaults(self, namespaces):
+        ret_list = []
+        ignore_set = {"default", "kube-public", "kube-system"}
+        for namespace in namespaces:
+            if namespace not in ignore_set:
+                ret_list.append(namespace)
+        return ret_list
+
     def get_components(self):
         """Query the cluster for components.
         
         Returns:
             sorted dictionary of components in the cluster
         """
-        pods = self.get_pods_for_all_namespaces()
-        sorted_components = self.process_cluster_data(pods)
-        return sorted_components
+        components = []
+        namespaces = self.get_namespaces()
+        namespaces = self.remove_defaults(namespaces)
+        # Scenario where cluster contains namespaces other than the default ones
+        if namespaces:
+            components = [get_first_word(namespace, "-") for namespace in namespaces]
+        # Scenario where cluster applications all live in the default namespace
+        else:
+            pods = self.get_pods_for_all_namespaces()
+            components = self.process_cluster_data(pods) 
+        return components
 
     def process_cluster_data(self, cluster_data):
-        """Process cluster data for usage.
+        """Process pods or deployments for usage.
         
         Returns:
             dictionary of components
@@ -84,6 +121,10 @@ class Cluster():
 
         return deployment_list
 
+def get_first_word(string, delimiter=" "):
+    """Return the first word of a string, split by a delimiter."""
+    words = string.split(delimiter)
+    return words[0]
 
 def count_first_word(dict_list, key):
     """Count the first word of each dict[key] in the list.
