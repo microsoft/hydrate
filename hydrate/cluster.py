@@ -16,7 +16,6 @@ class Cluster():
         self.apps_v1_api = None
         self.core_v1_api = None
         self.namespaced_pods = {}
-        self.connect_to_cluster()
 
     def connect_to_cluster(self):
         """Connect to the cluster. Set API attributes."""
@@ -138,8 +137,16 @@ class Cluster():
         return deployment_list
 
 
-def get_first_word(string, delimiter=" "):
-    """Return the first word of a string, split by a delimiter."""
+def get_first_word(string, delimiter="-"):
+    """Return the first word of a string, split by a delimiter.
+    
+    Args:
+        string: string input
+        delimiter: separator between words (default:"-")
+
+    Returns:
+        words[0]: first word of input string
+    """
     words = string.split(delimiter)
     return words[0]
 
