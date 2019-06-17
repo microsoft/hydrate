@@ -80,19 +80,25 @@ class Cluster():
             components = [get_first_word(comp) for comp in components]
         # Scenario where cluster applications all live in the default namespace
         else:
-            pods = self.get_pods_for_all_namespaces()
-            components = self.process_cluster_data(pods)
+            pods = self.get_namespaced_pods("default")
+            components = self.process_cluster_objects(pods)
         return components
 
-    def process_cluster_data(self, cluster_data):
-        """Process pods or deployments for usage.
+    def process_cluster_objects(self, object_list):
+        """Process a list of kubernetes objects.
+
+        Args:
+            object_list: list of object names
 
         Returns:
-            list of tuples: components sorted by value
+            comp_list: component names sorted by value in desc. order
 
         """
-        comp_list = count_first_word(cluster_data, "name")
-        return sort_dict_by_value(comp_list)
+        comp_list = count_first_word(object_list)
+        comp_list = sort_dict_by_value(comp_list)
+        # Take just the component name, not the frequency
+        comp_list = [component[0] for component in comp_list]
+        return comp_list
 
     def get_pods_for_all_namespaces(self):
         """Return list of dicts of pod info.
@@ -139,32 +145,32 @@ class Cluster():
 
 def get_first_word(string, delimiter="-"):
     """Return the first word of a string, split by a delimiter.
-    
+
     Args:
         string: string input
         delimiter: separator between words (default:"-")
 
     Returns:
         words[0]: first word of input string
+
     """
     words = string.split(delimiter)
     return words[0]
 
 
-def count_first_word(dict_list, key):
-    """Count the first word of each dict[key] in the list.
+def count_first_word(str_list):
+    """Count the first word of each string in the list.
 
     Args:
-        dict_list: List of dictionaries
-        key: Used to obtain the values from each dictionary
+        str_list: List of strings
 
     Returns:
-        dict(key:word, value:count) sorted by value desc. order
+        list[(word, count), ...] sorted by value desc. order
 
     """
     ret_count = dict()
-    for item in dict_list:
-        words = item[key].split("-")
+    for phrase in str_list:
+        words = phrase.split("-")
         ret_count[words[0]] = ret_count.get(words[0], 0) + 1
     return ret_count
 
