@@ -12,10 +12,10 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/andrewDoing/hydrate",
-    packages=['kubernetes', 'ruamel.yaml'],
+    install_requires=['kubernetes', 'ruamel.yaml'],
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: MIT License",
+        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
 )
