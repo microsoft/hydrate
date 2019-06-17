@@ -12,7 +12,52 @@ from hydrate.hld import Component, generate_HLD
 curr_path = os.path.dirname(__file__)
 tmp_path = os.path.relpath('tmp', curr_path)
 
-if __name__ == '__main__':
+
+def main(args):
+    """Generate the HLD for the cluster."""
+    # Define verbose_print as print if -v, o.w. do nothing
+    verbose_print = print if args.verbose else lambda *a, **k: None
+    verbose_print("Printing verbosely...")
+
+    print("Connecting to cluster...")
+    my_cluster = Cluster(args.kubeconfig)
+    my_cluster.connect_to_cluster()
+    print("Connected!")
+
+    print("Collecting information from the cluster...")
+    components = my_cluster.get_components()
+
+    verbose_print("Creating Component object...")
+    my_component = Component(args.name)
+
+    verbose_print("Creating the list of subcomponents...")
+    sub_list = []
+    for component in components:
+        s = Component(component)
+        s.delete_none_attrs()
+        sub_list.append(s)
+
+    my_component.subcomponents = sub_list
+
+    print("Writing HLD...")
+
+    if args.dry_run:
+        verbose_print("Writing component.yaml to terminal...")
+        generate_HLD(my_component, sys.stdout)
+    else:
+        if args.output:
+            verbose_print("Writing component.yaml to {}.".format(args.output))
+            output = os.path.join(args.output, "component.yaml")
+            with open(output, "w") as of:
+                generate_HLD(my_component, of)
+        else:
+            verbose_print("Writing to component.yaml...")
+            with open("component.yaml", "w") as of:
+                generate_HLD(my_component, of)
+
+
+def parse_args():
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description='Generate a component.yaml file for your cluster.')
     parser.add_argument(
@@ -43,43 +88,9 @@ if __name__ == '__main__':
         '-d', '--dry-run',
         action='store_true',
         help='Print component.yaml to the terminal.')
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    # Define verbose_print as print if -v, o.w. do nothing
-    verbose_print = print if args.verbose else lambda *a, **k: None
-    verbose_print("Printing verbosely...")
 
-    verbose_print("Connecting to cluster...")
-    my_cluster = Cluster(args.kubeconfig)
-    verbose_print("Connected!")
-
-    verbose_print("Collecting information from the cluster...")
-    components = my_cluster.get_components()
-
-    verbose_print("Creating Component object...")
-    my_component = Component(args.name)
-
-    verbose_print("Creating the list of subcomponents...")
-    sub_list = []
-    for component in components:
-        s = Component(component)
-        s.delete_none_attrs()
-        sub_list.append(s)
-
-    my_component.subcomponents = sub_list
-
-    verbose_print("Writing HLD...")
-
-    if args.dry_run:
-        verbose_print("Writing component.yaml to terminal...")
-        generate_HLD(my_component, sys.stdout)
-    else:
-        if args.output:
-            verbose_print("Writing component.yaml to {}.".format(args.output))
-            output = os.path.join(args.output, "component.yaml")
-            with open(output, "w") as of:
-                generate_HLD(my_component, of)
-        else:
-            verbose_print("Writing to component.yaml...")
-            with open("component.yaml", "w") as of:
-                generate_HLD(my_component, of)
+if __name__ == '__main__':
+    args = parse_args()
+    main(args)
