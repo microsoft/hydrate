@@ -23,6 +23,26 @@ class Cluster():
         self.apps_v1_api = client.AppsV1Api()
         self.core_v1_api = client.CoreV1Api()
 
+    def get_components(self):
+        """Query the cluster for components.
+
+        Returns:
+            sorted dictionary of components in the cluster
+
+        """
+        components = []
+        namespaces = self.get_namespaces()
+        namespaces = self.remove_defaults(namespaces)
+        # Scenario where cluster contains namespaces other than default ones
+        if namespaces:
+            components = [namespace for namespace in namespaces]
+            components = [get_first_word(comp) for comp in components]
+        # Scenario where cluster applications all live in the default namespace
+        else:
+            pods = self.get_namespaced_pods("default")
+            components = self.process_cluster_objects(pods)
+        return components
+
     def get_namespaces(self):
         """Query the cluster for namespaces."""
         ret = self.core_v1_api.list_namespace()
@@ -49,56 +69,6 @@ class Cluster():
                 pod_list.append(i.metadata.name)
             self.namespaced_pods[namespace] = pod_list
             return pod_list
-
-    def remove_defaults(self, namespaces):
-        """Remove the default and kubernetes namespaces.
-
-        Returns:
-            ret_list: list of namespaces
-
-        """
-        ret_list = []
-        ignore_set = {"default", "kube-public", "kube-system"}
-        for namespace in namespaces:
-            if namespace not in ignore_set:
-                ret_list.append(namespace)
-        return ret_list
-
-    def get_components(self):
-        """Query the cluster for components.
-
-        Returns:
-            sorted dictionary of components in the cluster
-
-        """
-        components = []
-        namespaces = self.get_namespaces()
-        namespaces = self.remove_defaults(namespaces)
-        # Scenario where cluster contains namespaces other than default ones
-        if namespaces:
-            components = [namespace for namespace in namespaces]
-            components = [get_first_word(comp) for comp in components]
-        # Scenario where cluster applications all live in the default namespace
-        else:
-            pods = self.get_namespaced_pods("default")
-            components = self.process_cluster_objects(pods)
-        return components
-
-    def process_cluster_objects(self, object_list):
-        """Process a list of kubernetes objects.
-
-        Args:
-            object_list: list of object names
-
-        Returns:
-            comp_list: component names sorted by value in desc. order
-
-        """
-        comp_list = count_first_word(object_list)
-        comp_list = sort_dict_by_value(comp_list)
-        # Take just the component name, not the frequency
-        comp_list = [component[0] for component in comp_list]
-        return comp_list
 
     def get_pods_for_all_namespaces(self):
         """Return list of dicts of pod info.
@@ -141,6 +111,36 @@ class Cluster():
             deployment_list.append(d)
 
         return deployment_list
+
+    def process_cluster_objects(self, object_list):
+        """Process a list of kubernetes objects.
+
+        Args:
+            object_list: list of object names
+
+        Returns:
+            comp_list: component names sorted by value in desc. order
+
+        """
+        comp_list = count_first_word(object_list)
+        comp_list = sort_dict_by_value(comp_list)
+        # Take just the component name, not the frequency
+        comp_list = [component[0] for component in comp_list]
+        return comp_list
+
+    def remove_defaults(self, namespaces):
+        """Remove the default and kubernetes namespaces.
+
+        Returns:
+            ret_list: list of namespaces
+
+        """
+        ret_list = []
+        ignore_set = {"default", "kube-public", "kube-system"}
+        for namespace in namespaces:
+            if namespace not in ignore_set:
+                ret_list.append(namespace)
+        return ret_list
 
 
 def get_first_word(string, delimiter="-"):
