@@ -1,6 +1,6 @@
 """Kubernetes Cluster API Class."""
 from kubernetes import client, config
-
+from .component import Component
 
 class Cluster():
     """Define Cluster data and methods."""
@@ -37,6 +37,7 @@ class Cluster():
         if namespaces:
             components = [namespace for namespace in namespaces]
             components = [get_first_word(comp) for comp in components]
+            components = [Component(name) for name in components]
         # Scenario where cluster applications all live in the default namespace
         else:
             pods = self.get_namespaced_pods("default")
@@ -125,7 +126,7 @@ class Cluster():
         comp_list = count_first_word(object_list)
         comp_list = sort_dict_by_value(comp_list)
         # Take just the component name, not the frequency
-        comp_list = [component[0] for component in comp_list]
+        comp_list = [Component(component[0]) for component in comp_list]
         return comp_list
 
     def remove_defaults(self, namespaces):
