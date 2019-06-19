@@ -1,1 +1,2 @@
+"""Hydrate Package."""
 name = "hydrate"

@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 from .cluster import Cluster
-from .component import Component
+from .component import Component, get_full_matches
 from .hld import generate_HLD
 from .scrape import get_repo_components
 
@@ -31,24 +31,8 @@ def main(args):
     print("Collecting Fabrikate Components from GitHub...")
     repo_components = get_repo_components()
 
-    verbose_print("#############################################")
-    verbose_print("              Existing Components            ")
-    for rc in repo_components:
-        verbose_print(rc)
-    verbose_print("#############################################")
-    verbose_print("              Cluster Components             ")
-    for cc in cluster_components:
-        verbose_print(cc)
-    verbose_print("#############################################")
-
-    verbose_print("Comparing Fabrikate Components to Cluster Deployments...")
+    print("Comparing Fabrikate Components to Cluster Deployments...")
     full_matches = get_full_matches(repo_components, cluster_components)
-    verbose_print("#############################################")
-    verbose_print("                 Full Matches                ")
-    for full_match in full_matches:
-        verbose_print(full_match)
-    verbose_print("#############################################")
-
 
     verbose_print("Creating Component object...")
     my_component = Component(args.name, path="./manifests")
@@ -111,25 +95,6 @@ def parse_args():
         action='store_true',
         help='Print component.yaml to the terminal.')
     return parser.parse_args()
-
-
-def get_full_matches(repo_components, cluster_components):
-    """Returns the Fabrikate Components that fully match the cluster."""
-    full_matches = []
-    cluster_set = set()
-    for cc in cluster_components:
-        cluster_set.add(cc.name)
-    for rc in repo_components:
-        repo_set = set(rc.name.split('-'))
-        if repo_set <= cluster_set:
-            # Full match. Every name for this component is in the cluster.
-            cluster_set -= repo_set
-            full_matches.append(rc)
-
-    if cluster_set:
-        print("Leftover deployments in cluster: {}".format(cluster_set))
-    
-    return full_matches
 
 
 if __name__ == '__main__':

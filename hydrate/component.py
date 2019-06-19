@@ -6,7 +6,7 @@ from copy import deepcopy
 class Component():
     """Hold the information for fabrikate High-Level Deployment(HLD)."""
 
-    def __init__(self, name, generator="static", 
+    def __init__(self, name, generator="static",
                  source="<source repository url>", method="git",
                  path=None):
         """Instantiate a Component object.
@@ -61,3 +61,22 @@ class Component():
     def prep(self):
         """Prep the object for yaml output."""
         pass
+
+
+def get_full_matches(repo_components, cluster_components):
+    """Return the Fabrikate Components that fully match the cluster."""
+    full_matches = []
+    cluster_set = set()
+    for cc in cluster_components:
+        cluster_set.add(cc.name)
+    for rc in repo_components:
+        repo_set = set(rc.name.split('-'))
+        if repo_set <= cluster_set:
+            # Full match. Every name for this component is in the cluster.
+            cluster_set -= repo_set
+            full_matches.append(rc)
+
+    if cluster_set:
+        print("Leftover deployments in cluster: {}".format(cluster_set))
+
+    return full_matches
