@@ -167,7 +167,7 @@ def count_first_word(str_list):
         str_list: List of strings
 
     Returns:
-        list[(word, count), ...] sorted by value desc. order
+        {"word": count, ...}
 
     """
     ret_count = dict()
