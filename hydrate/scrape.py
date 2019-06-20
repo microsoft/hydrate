@@ -1,9 +1,5 @@
 """Scrapes Github for Fabrikate Component Information."""
-
-import json
 from requests import get
-from requests.exceptions import RequestException
-from contextlib import closing
 
 from .component import Component
 
