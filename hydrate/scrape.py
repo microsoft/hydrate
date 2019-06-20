@@ -12,8 +12,6 @@ def get_repo_components():
     json_string = json_get(COMP_DEFS_URL)
     components = parse_json(json_string)
     components = remove_fabrikate_prefix(components)
-    for component in components:
-        print(component)
     return components
 
 
