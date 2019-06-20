@@ -1,5 +1,6 @@
 """Scrapes Github for Fabrikate Component Information."""
 from requests import get
+import re
 
 from .component import Component
 
@@ -26,20 +27,8 @@ def parse_json(json_list):
 
 def remove_fabrikate_prefix(components):
     """Remove the fabrikate prefix from the Component names."""
-    fabrikate_found = False
     for component in components:
-        words = component.name.split("-")
-        new_title = ""
-        if words[0] == "fabrikate":
-            fabrikate_found = True
-            words = words[1:]
-        for idx, word in enumerate(words):
-            if idx != 0:
-                new_title += "-"
-            new_title += word
-        component.name = new_title
-    if not fabrikate_found:
-        print("Components do not contain Fabrikate prefix!")
+        component.name = re.sub('^fabrikate-', '', component.name)
     return components
 
 
