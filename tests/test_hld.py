@@ -1,7 +1,7 @@
 """Test suite for hld.py."""
 import pytest
 import io
-from hydrate.hld import Component
+from hydrate.component import Component
 from hydrate.hld import generate_HLD
 
 

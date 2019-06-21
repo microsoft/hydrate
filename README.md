@@ -12,7 +12,7 @@ pip install -r requirements.txt
 
 ## Basic Usage
 ```bash
-python hydrate.py [-h] [-n NAME] [-o path] [-v] [-d] run
+python -m hydrate [-h] [-n NAME] [-o path] [-v] [-d] run
 ```
 
 ### Positional arguments:
