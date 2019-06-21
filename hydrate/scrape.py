@@ -37,5 +37,4 @@ def json_get(url):
     resp = get(url)
     if resp.status_code != 200:
         return None
-    else:
-        return resp.json()
+    return resp.json()
