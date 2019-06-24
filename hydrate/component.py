@@ -29,9 +29,9 @@ class Component():
         self.subcomponents = None
 
     def __eq__(self, other):
-        """Overrides the default implementation."""
+        """Override the default __eq__."""
         if isinstance(other, Component):
-            return (self.name == other.name and 
+            return (self.name == other.name and
                     self.source == other.source)
         return False
 
