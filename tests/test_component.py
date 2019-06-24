@@ -30,7 +30,6 @@ class TestComponent():
         if value is None:
             delattr(exp_component_none_attrs, key)
 
-
     def test_asdict(self):
         """Test the asdict() method."""
         assert self.tst_component.asdict() == self.exp_component_asdict
