@@ -45,15 +45,13 @@ class Component():
     def asdict(self):
         """Return dict of Component."""
         d = dict()
-        try:
-            if self.subcomponents:
-                d = {key: value for key, value in self.__dict__.items()
-                     if key != "subcomponents"}
-                d["subcomponents"] = []
-                for subcomponent in self.subcomponents:
-                    d["subcomponents"].append(subcomponent.asdict())
-
-        except AttributeError:
+        if self.subcomponents:
+            d = {key: value for key, value in self.__dict__.items()
+                 if key != "subcomponents"}
+            d["subcomponents"] = []
+            for subcomponent in self.subcomponents:
+                d["subcomponents"].append(subcomponent.asdict())
+        else:
             d = {key: value for key, value in self.__dict__.items()}
         return d
 
@@ -64,10 +62,6 @@ class Component():
         for key, value in attr_dict.items():
             if value is None:
                 delattr(self, key)
-
-    def prep(self):
-        """Prep the object for yaml output."""
-        pass
 
 
 def get_full_matches(repo_components, cluster_components):
