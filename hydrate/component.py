@@ -45,13 +45,16 @@ class Component():
     def asdict(self):
         """Return dict of Component."""
         d = dict()
-        if self.subcomponents:
-            d = {key: value for key, value in self.__dict__.items()
-                 if key != "subcomponents"}
-            d["subcomponents"] = []
-            for subcomponent in self.subcomponents:
-                d["subcomponents"].append(subcomponent.asdict())
-        else:
+        try:
+            if self.subcomponents:
+                d = {key: value for key, value in self.__dict__.items()
+                     if key != "subcomponents"}
+                d["subcomponents"] = []
+                for subcomponent in self.subcomponents:
+                    d["subcomponents"].append(subcomponent.asdict())
+            else:
+                d = {key: value for key, value in self.__dict__.items()}
+        except AttributeError:
             d = {key: value for key, value in self.__dict__.items()}
         return d
 
