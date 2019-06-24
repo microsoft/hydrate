@@ -28,6 +28,13 @@ class Component():
         self.repositories = None
         self.subcomponents = None
 
+    def __eq__(self, other):
+        """Overrides the default implementation."""
+        if isinstance(other, Component):
+            return (self.name == other.name and 
+                    self.source == other.source)
+        return False
+
     def __str__(self):
         """Name of the Component."""
         return self.name
