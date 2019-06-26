@@ -10,10 +10,12 @@ COMP_DEFS_URL = "https://api.github.com/repos/microsoft/fabrikate-definitions/co
 
 def get_repo_components():
     """Return the Fabrikate Component List."""
-    json_string = json_get(COMP_DEFS_URL)
-    components = parse_json(json_string)
-    components = remove_fabrikate_prefix(components)
-    return components
+    json_obj = json_get(COMP_DEFS_URL)
+    if json_obj:
+        components = parse_json(json_obj)
+        components = remove_fabrikate_prefix(components)
+        return components
+    raise Exception('JSON not retrieved. URL:{}'.format(COMP_DEFS_URL))
 
 
 def parse_json(json_list):

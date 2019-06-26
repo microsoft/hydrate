@@ -28,6 +28,12 @@ class Component():
         self.repositories = None
         self.subcomponents = None
 
+    def __eq__(self, other):
+        """Override the default __eq__."""
+        if type(other) is type(self):
+            return self.__dict__ == other.__dict__
+        return False
+
     def __str__(self):
         """Name of the Component."""
         return self.name
@@ -45,7 +51,8 @@ class Component():
                 d["subcomponents"] = []
                 for subcomponent in self.subcomponents:
                     d["subcomponents"].append(subcomponent.asdict())
-
+            else:
+                d = {key: value for key, value in self.__dict__.items()}
         except AttributeError:
             d = {key: value for key, value in self.__dict__.items()}
         return d
@@ -57,10 +64,6 @@ class Component():
         for key, value in attr_dict.items():
             if value is None:
                 delattr(self, key)
-
-    def prep(self):
-        """Prep the object for yaml output."""
-        pass
 
 
 def get_full_matches(repo_components, cluster_components):
