@@ -30,9 +30,8 @@ class Component():
 
     def __eq__(self, other):
         """Override the default __eq__."""
-        if isinstance(other, Component):
-            return (self.name == other.name and
-                    self.source == other.source)
+        if type(other) is type(self):
+            return self.__dict__ == other.__dict__
         return False
 
     def __str__(self):

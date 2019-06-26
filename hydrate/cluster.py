@@ -48,10 +48,7 @@ class Cluster():
     def get_namespaces(self):
         """Query the cluster for namespaces."""
         ret = self.core_v1_api.list_namespace()
-        namespace_list = []
-        for i in ret.items:
-            namespace_list.append(i.metadata.name)
-        return namespace_list
+        return [i.metadata.name for i in ret.items]
 
     def get_namespaced_pods(self, namespace):
         """Store the list of pods in the namespace.
@@ -65,54 +62,10 @@ class Cluster():
         if namespace in self.namespaced_pods:
             return self.namespaced_pods[namespace]
         else:
-            namespaced_pods = self.core_v1_api.list_namespaced_pod(namespace)
-            pod_list = []
-            for i in namespaced_pods.items:
-                pod_list.append(i.metadata.name)
+            ret = self.core_v1_api.list_namespaced_pod(namespace)
+            pod_list = [i.metadata.name for i in ret.items]
             self.namespaced_pods[namespace] = pod_list
             return pod_list
-
-    def get_pods_for_all_namespaces(self):
-        """Return list of dicts of pod info.
-
-        Returns:
-            pod_list: list of dicts
-
-        """
-        pod_list = []
-        ret = self.core_v1_api.list_pod_for_all_namespaces(watch=False)
-        for i in ret.items:
-            d = dict()
-            d["ip"] = i.status.pod_ip
-            d["name"] = i.metadata.name
-            d["namespace"] = i.metadata.namespace
-            pod_list.append(d)
-
-        return pod_list
-
-    def get_deployments_for_all_namespaces(self):
-        """Return list of dicts of deployment info.
-
-        Returns:
-            deployment_list: list of dicts
-
-        """
-        deployment_list = []
-        ret = self.apps_v1_api.list_deployment_for_all_namespaces(watch=False)
-        for i in ret.items:
-            d = dict()
-            d["name"] = i.metadata.name
-            d["namespace"] = i.metadata.namespace
-            d["replicas"] = i.spec.replicas
-
-            container_list = []
-            for container in i.spec.template.spec.containers:
-                container_list.append(container.image)
-
-            d["containers"] = container_list
-            deployment_list.append(d)
-
-        return deployment_list
 
     def process_cluster_objects(self, object_list):
         """Process a list of kubernetes objects.
