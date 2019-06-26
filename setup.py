@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='hydrate',
-    version='0.3.0',
+    version='0.4.0',
     author='andrewDoing',
     author_email='andrew.doing@mst.edu',
     description='A package to generate an HLD for your kubernetes cluster',
