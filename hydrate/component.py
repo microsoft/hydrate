@@ -6,9 +6,9 @@ from copy import deepcopy
 class Component():
     """Hold the information for fabrikate High-Level Deployment(HLD)."""
 
-    def __init__(self, name, generator="static",
-                 source="<source repository url>", method="git",
-                 path=None):
+    def __init__(self, name, generator=None, source="<source repository url>",
+                 method="git", path=None, version=None, branch=None,
+                 hooks=None, repositories=None, subcomponents=None):
         """Instantiate a Component object.
 
         Args:
@@ -22,11 +22,11 @@ class Component():
         self.source = source
         self.method = method
         self.path = path
-        self.version = None
-        self.branch = None
-        self.hooks = None
-        self.repositories = None
-        self.subcomponents = None
+        self.version = version
+        self.branch = branch
+        self.hooks = hooks
+        self.repositories = repositories
+        self.subcomponents = subcomponents
 
     def __eq__(self, other):
         """Override the default __eq__."""

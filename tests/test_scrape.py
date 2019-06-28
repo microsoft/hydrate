@@ -2,8 +2,10 @@
 import pytest
 
 from hydrate.component import Component
+from hydrate.scrape import FAB_DEFS_URL, FAB_DEFS_API
 from hydrate.scrape import get_repo_components
 from hydrate.scrape import parse_json
+from hydrate.scrape import construct_components
 from hydrate.scrape import remove_fabrikate_prefix
 from hydrate.scrape import json_get
 
@@ -11,31 +13,64 @@ from hydrate.scrape import json_get
                          [(1), (None)])
 def test_get_repo_components(mocker, json_get_ret):
     """Test the get_repo_components function."""
+    mock_json_get = mocker.patch("hydrate.scrape.json_get",
+                                 return_value=json_get_ret)
     mock_parse_json = mocker.patch("hydrate.scrape.parse_json",
                                    return_value=json_get_ret)
+    mock_construct_components = mocker.patch(
+        "hydrate.scrape.construct_components",
+        return_value=json_get_ret)
     mock_rm_fab_prefix = mocker.patch("hydrate.scrape.remove_fabrikate_prefix")
-    mock_json_get = mocker.patch("hydrate.scrape.json_get")
-    get_repo_components()
+
+    if json_get_ret:
+        get_repo_components()
+    else:
+        with pytest.raises(Exception, match=r".* URL:%s" % (FAB_DEFS_API)):
+            get_repo_components()
+
     mock_json_get.assert_called_once()
 
     if mock_json_get.return_value:
         mock_parse_json.assert_called_once()
+        mock_construct_components.assert_called_once()
         mock_rm_fab_prefix.assert_called_once()
     else:
         mock_parse_json.assert_not_called()
+        mock_construct_components.assert_not_called()
         mock_rm_fab_prefix.assert_not_called()
 
 
-tst_json_list = [{"name": "Test1", "html_url": "www.test1.com"},
-                 {"name": "Test2", "html_url": "www.test2.com"}]
-exp_components = [Component("Test1", source="www.test1.com"),
-                  Component("Test2", source="www.test2.com")]
+tst_json_list = [{"name": "Test1",
+                  "source": FAB_DEFS_URL,
+                  "html_url": "www.test1.com"},
+                 {"name": "Test2",
+                  "source": FAB_DEFS_URL,
+                  "html_url": "www.test2.com"}]
+exp_json_data = [{"name": "Test1",
+                  "source": FAB_DEFS_URL,
+                  "path": "www.test1.com"},
+                 {"name": "Test2",
+                  "source": FAB_DEFS_URL,
+                  "path": "www.test2.com"}]
 
-@pytest.mark.parametrize('json_list, exp_components',
-                         [(tst_json_list, exp_components)])
-def test_parse_json(json_list, exp_components):
+@pytest.mark.parametrize('json_list, exp_json_data',
+                         [(tst_json_list, exp_json_data)])
+def test_parse_json(json_list, exp_json_data):
     """Test parse_json function."""
-    assert parse_json(json_list) == exp_components
+    assert parse_json(json_list) == exp_json_data
+
+
+exp_new_components = [Component("Test1",
+                                source=FAB_DEFS_URL,
+                                path="www.test1.com"),
+                      Component("Test2",
+                                source=FAB_DEFS_URL,
+                                path="www.test2.com")]
+@pytest.mark.parametrize('tst_json_data, exp_components',
+                         [(exp_json_data, exp_new_components)])
+def test_construct_components(tst_json_data, exp_components):
+    """Test construct_components function."""
+    assert construct_components(tst_json_data) == exp_components
 
 
 tst_fab_comps = [Component("fabrikate-test-component"),
