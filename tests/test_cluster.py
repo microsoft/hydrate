@@ -43,14 +43,13 @@ class TestCluster():
         mock_client.CoreV1Api.assert_called_once()
 
     tst_namespaces = ["elasticsearch", "istio", "jaeger"]
-    tst_deps = ["elasticsearch-dep", "istio-dep", "jaeger-dep"]
+    tst_pods = ["elasticsearch-pod", "istio-pod", "jaeger-pod"]
 
-    @pytest.mark.parametrize("tst_namespaces, tst_deps",
-                             [(tst_namespaces, tst_deps),
-                              (tst_namespaces, None),
-                              (None, tst_deps)])
+    @pytest.mark.parametrize("tst_namespaces, tst_pods",
+                             [(tst_namespaces, None),
+                              (None, tst_pods)])
     def test_get_components(self, mocker, cluster_connection,
-                            tst_namespaces, tst_deps):
+                            tst_namespaces, tst_pods):
         """Test the method get_components."""
         mock_get_namespaces = mocker.patch(
             "hydrate.cluster.Cluster.get_namespaces",
@@ -59,22 +58,23 @@ class TestCluster():
             "hydrate.cluster.Cluster.remove_defaults",
             return_value=tst_namespaces)
         mock_get_first_word = mocker.patch("hydrate.cluster.get_first_word")
-        mock_get_namespaced_deployments = mocker.patch(
-            "hydrate.cluster.Cluster.get_namespaced_deployments",
-            return_value=tst_deps
-        )
-        mock_re_sub = mocker.patch("hydrate.cluster.re.sub")
+        mock_get_namespaced_pods = mocker.patch(
+            "hydrate.cluster.Cluster.get_namespaced_pods",
+            return_value=tst_pods)
+        mock_process_cluster_objects = mocker.patch(
+            "hydrate.cluster.Cluster.process_cluster_objects",
+            return_value=tst_pods)
 
         components = cluster_connection.get_components()
 
         assert components
-        mock_get_namespaced_deployments.assert_called_once()
         mock_get_namespaces.assert_called_once()
         mock_remove_defaults.assert_called_once()
         if tst_namespaces:
             mock_get_first_word.assert_called()
-        if tst_deps:
-            mock_re_sub.assert_called()
+        else:
+            mock_get_namespaced_pods.assert_called_once()
+            mock_process_cluster_objects.assert_called_once()
 
     tst_get_namespaces = ["elasticsearch", "istio", "jaeger"]
     @pytest.mark.parametrize("tst_get_namespaces",

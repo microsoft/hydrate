@@ -1,7 +1,6 @@
 """Kubernetes Cluster API Class."""
 from kubernetes import client, config
 from .component import Component
-import re
 
 
 class Cluster():
@@ -17,8 +16,7 @@ class Cluster():
         self.kubeconfig = kubeconfig
         self.apps_v1_api = None
         self.core_v1_api = None
-        self.namespaced_pods = dict()
-        self.namespaced_deployments = dict()
+        self.namespaced_pods = {}
 
     def connect_to_cluster(self):
         """Connect to the cluster. Set API attributes."""
@@ -34,48 +32,23 @@ class Cluster():
 
         """
         components = []
-        default_deps = self.get_namespaced_deployments("default")
         namespaces = self.get_namespaces()
         namespaces = self.remove_defaults(namespaces)
-        # Scenario where cluster applications live in namespaces
+        # Scenario where cluster contains namespaces other than default ones
         if namespaces:
-            first_words = [get_first_word(name) for name in namespaces]
-            components.extend([Component(word) for word in first_words])
-        # Scenario where cluster applications live in default
-        if default_deps:
-            dep_names = [
-                re.sub(r'-deployment', '', dep) for dep in default_deps]
-            components.extend([Component(n) for n in dep_names])
-
+            components = [namespace for namespace in namespaces]
+            components = [get_first_word(comp) for comp in components]
+            components = [Component(name) for name in components]
+        # Scenario where cluster applications all live in the default namespace
+        else:
+            pods = self.get_namespaced_pods("default")
+            components = self.process_cluster_objects(pods)
         return components
-
-    def get_statefulsets(self):
-        """Query the cluster for statefulsets."""
-        ret = self.apps_v1_api.list_stateful_set_for_all_namespaces()
-        with open("statefulsets.json", "w") as of:
-            of.write(dict(ret))
 
     def get_namespaces(self):
         """Query the cluster for namespaces."""
         ret = self.core_v1_api.list_namespace()
         return [i.metadata.name for i in ret.items]
-
-    def get_namespaced_deployments(self, namespace):
-        """Store the list of deployments in the namespace.
-
-        Args:
-            namespace: The namespace to look in.
-
-        Return:
-            deployment_list: list of pods found in the namespace.
-        """
-        if namespace in self.namespaced_deployments:
-            return self.namespaced_deployments[namespace]
-        else:
-            ret = self.apps_v1_api.list_namespaced_deployment(namespace)
-            deployment_list = [i.metadata.name for i in ret.items]
-            self.namespaced_pods[namespace] = deployment_list
-            return deployment_list
 
     def get_namespaced_pods(self, namespace):
         """Store the list of pods in the namespace.
