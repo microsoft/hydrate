@@ -66,10 +66,37 @@ class Component():
                 delattr(self, key)
 
 
+def match_components(repo_components, cluster_components):
+    """Match cluster and repo components."""
+    subcomponents = []
+    category_indeces = []
+    rc = repo_components
+    cc = cluster_components
+    full_matches, fm_leftovers = get_full_matches(rc, cc)
+
+    # Indeces are determined by the length of the previous category
+    if full_matches:
+        subcomponents.extend(full_matches)
+        category_indeces.append((0, "Full Match Components"))
+
+    if fm_leftovers:
+        subcomponents.extend(fm_leftovers)
+        category_indeces.append((len(full_matches), "No Match Deployments"))
+
+    return subcomponents, category_indeces
+
+
 def get_full_matches(repo_components, cluster_components):
-    """Return the Fabrikate Components that fully match the cluster."""
+    """Determine which components fully match the cluster.
+
+    Returns:
+        full_matches: list of components
+        leftovers: list of components
+
+    """
     full_matches = []
     cluster_set = set()
+    leftovers = None
     for cc in cluster_components:
         cluster_set.add(cc.name)
     for rc in repo_components:
@@ -81,5 +108,6 @@ def get_full_matches(repo_components, cluster_components):
 
     if cluster_set:
         print("Leftover deployments in cluster: {}".format(cluster_set))
+        leftovers = [cc for cc in cluster_components if cc.name in cluster_set]
 
-    return full_matches
+    return full_matches, leftovers

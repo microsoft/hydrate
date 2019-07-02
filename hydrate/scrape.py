@@ -6,7 +6,7 @@ from .component import Component
 
 # URL to the Fabrikate Component Definitions
 FAB_DEFS_URL = "https://github.com/microsoft/fabrikate-definitions"
-FAB_DEFS_API = "https://api.github.com/repos/microsoft/fabrikate-definitions/contents/definitions"
+FAB_DEFS_API = "https://api.github.com/repos/microsoft/fabrikate-definitions/contents/definitions"  # noqa
 
 
 def get_repo_components():

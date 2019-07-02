@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 from .cluster import Cluster
-from .component import Component, get_full_matches
+from .component import Component, match_components
 from .hld import generate_HLD
 from .scrape import get_repo_components
 
@@ -26,20 +26,20 @@ def main(args):
     print("Connected!")
 
     print("Collecting information from the cluster...")
-    cluster_components = my_cluster.get_components()
+    cc = my_cluster.get_components()
 
     print("Collecting Fabrikate Components from GitHub...")
-    repo_components = get_repo_components()
+    rc = get_repo_components()
 
     print("Comparing Fabrikate Components to Cluster Deployments...")
-    full_matches = get_full_matches(repo_components, cluster_components)
+    subcomponents, category_indeces = match_components(rc, cc)
 
     verbose_print("Creating Component object...")
     my_component = Component(args.name, path="./manifests")
 
     verbose_print("Creating the list of subcomponents...")
     sub_list = []
-    for component in full_matches:
+    for component in subcomponents:
         component.delete_none_attrs()
         sub_list.append(component)
 
@@ -47,19 +47,22 @@ def main(args):
 
     print("Writing HLD...")
 
+    output_file = None
     if args.dry_run:
         verbose_print("Writing component.yaml to terminal...")
-        generate_HLD(my_component, sys.stdout)
+        generate_HLD(my_component, sys.stdout, category_indeces)
+
     else:
         if args.output:
             verbose_print("Writing component.yaml to {}.".format(args.output))
-            output = os.path.join(args.output, "component.yaml")
-            with open(output, "w") as of:
-                generate_HLD(my_component, of)
+            output_file = os.path.join(args.output, "component.yaml")
+
         else:
             verbose_print("Writing to component.yaml...")
-            with open("component.yaml", "w") as of:
-                generate_HLD(my_component, of)
+            output_file = "component.yaml"
+
+        with open(output_file, "w") as of:
+            generate_HLD(my_component, of, category_indeces)
 
 
 def parse_args():

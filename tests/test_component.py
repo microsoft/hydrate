@@ -50,14 +50,23 @@ tst_repo_components = [Component("dep1-dep2"),
                        Component("dep4-dep5")]
 exp_full_matches = [Component("dep1-dep2"),
                     Component("dep3")]
+exp_leftovers = [Component("dep4"),
+                 Component("dep6")]
 
 
-@pytest.mark.parametrize('repo_components, cluster_components, expected',
+@pytest.mark.parametrize('''repo_components, cluster_components,
+                            expected_fm, expected_leftos''',
                          [(tst_repo_components,
                            tst_cluster_components,
-                           exp_full_matches)])
-def test_get_full_matches(repo_components, cluster_components, expected):
+                           exp_full_matches,
+                           exp_leftovers)])
+def test_get_full_matches(repo_components, cluster_components,
+                          expected_fm, expected_leftos):
     """Test get_full_matches()."""
-    full_matches = get_full_matches(repo_components, cluster_components)
-    for fmc, exp in zip_longest(full_matches, exp_full_matches):
+    fms, leftos = get_full_matches(repo_components, cluster_components)
+
+    for fmc, exp in zip_longest(fms, exp_full_matches):
         assert fmc.name == exp.name
+
+    for lefto, exp_lefto in zip_longest(leftos, exp_leftovers):
+        assert lefto.name == exp_lefto.name
