@@ -2,7 +2,7 @@
 Hydrate crawls a kubernetes cluster and generates a high level description of your deployments.
 
 ## Setup
-Ensure you are using Python 3 or a newer version.
+Ensure you are using Python 3.6 or a newer version.
 Include a "kubeconfig" file for your cluster in the same directory as hydrate.py,
 or specify one with the -k argument.
 Finally, install the dependencies.
@@ -12,8 +12,15 @@ pip install -r requirements.txt
 
 ## Basic Usage
 ```bash
-python -m hydrate [-h] [-n NAME] [-o path] [-v] [-d] run
+python -m hydrate [-h] [-n NAME] [-k FILE] [-o PATH] [-v] [-d] run
 ```
+The component.yaml file that is created is based on the specification detailed in the [Fabrikate](https://github.com/Microsoft/fabrikate "Fabrikate") repo.
+
+[Fabrikate Component Definition](https://github.com/microsoft/fabrikate/blob/master/docs/component.md "Component Definition")
+
+[Fabrikate Config Definition](https://github.com/microsoft/fabrikate/blob/master/docs/config.md "Config Definition")
+
+
 
 ### Positional arguments:
 
