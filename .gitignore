@@ -1,4 +1,5 @@
 .gitcredentials
+.vscode
 apikey
 kubeconfig*
 tmp

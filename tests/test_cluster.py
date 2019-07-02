@@ -33,14 +33,15 @@ class TestCluster():
 
     def test_connect_to_cluster(self, mocker, cluster_connection):
         """Test the method connect_to_cluster."""
-        mock_config = mocker.patch("hydrate.cluster.config", autospec=True)
-        mock_client = mocker.patch("hydrate.cluster.client", autospec=True)
+        mock_load_config = mocker.patch("kubernetes.config.load_kube_config")
+        mock_AppsV1Api = mocker.patch("kubernetes.client.AppsV1Api")
+        mock_CoreV1Api = mocker.patch("kubernetes.client.CoreV1Api")
 
         cluster_connection.connect_to_cluster()
 
-        mock_config.load_kube_config.assert_called_once()
-        mock_client.AppsV1Api.assert_called_once()
-        mock_client.CoreV1Api.assert_called_once()
+        mock_load_config.assert_called_once()
+        mock_AppsV1Api.assert_called_once()
+        mock_CoreV1Api.assert_called_once()
 
     tst_namespaces = ["elasticsearch", "istio", "jaeger"]
     tst_deps = ["elasticsearch-dep", "istio-dep", "jaeger-dep"]

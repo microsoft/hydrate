@@ -1,5 +1,4 @@
 """Kubernetes Cluster API Class."""
-from kubernetes import client, config
 from .component import Component
 import re
 
@@ -22,9 +21,11 @@ class Cluster():
 
     def connect_to_cluster(self):
         """Connect to the cluster. Set API attributes."""
-        config.load_kube_config(self.kubeconfig)
-        self.apps_v1_api = client.AppsV1Api()
-        self.core_v1_api = client.CoreV1Api()
+        from kubernetes.config import load_kube_config
+        from kubernetes.client import AppsV1Api, CoreV1Api
+        load_kube_config(self.kubeconfig)
+        self.apps_v1_api = AppsV1Api()
+        self.core_v1_api = CoreV1Api()
 
     def get_components(self):
         """Query the cluster for components.
