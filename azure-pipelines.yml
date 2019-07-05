@@ -30,3 +30,17 @@ steps:
     pip install pytest pytest-azurepipelines
     pytest
   displayName: 'pytest'
+
+- script : |
+    pip install pycodestyle
+    pip install pydocstyle
+    pip install pyflakes
+    python -m pycodestyle hydrate/*.py
+    python -m pydocstyle hydrate/*.py
+    python -m pyflakes hydrate/*.py
+    python -m pycodestyle tests/*.py
+    python -m pydocstyle tests/*.py
+    python -m pyflakes tests/*.py
+  displayName: 'CSE linting packages (pycodestyle, pydocstyle, pyflakes)'
+
+
