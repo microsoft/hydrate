@@ -3,9 +3,9 @@
 Functions:
     - main()
 """
-import argparse
 import os
-import sys
+from argparse import ArgumentParser
+from sys import stdout
 from pathlib import Path
 
 from .cluster import Cluster
@@ -35,7 +35,7 @@ def main(args):
     subcomponents, category_indeces = match_components(rc, cc)
 
     verbose_print("Creating Component object...")
-    my_component = Component(args.name, path="./manifests")
+    my_component = Component(args.name, source=None, method=None)
 
     verbose_print("Creating the list of subcomponents...")
     sub_list = []
@@ -50,7 +50,7 @@ def main(args):
     output_file = None
     if args.dry_run:
         verbose_print("Writing component.yaml to terminal...")
-        generate_HLD(my_component, sys.stdout, category_indeces)
+        generate_HLD(my_component, stdout, category_indeces)
 
     else:
         if args.output:
@@ -67,7 +67,7 @@ def main(args):
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         description='Generate a component.yaml file for your cluster.')
     parser.add_argument(
         'run',

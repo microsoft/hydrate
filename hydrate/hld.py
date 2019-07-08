@@ -5,6 +5,14 @@ yaml = YAML()
 
 OFFSET = 2
 
+TOP_LVL_COMMENT = '''Automatically generated using hydrate.
+Repository link: https://github.com/microsoft/hydrate
+Fabrikate Docs: https://github.com/Microsoft/fabrikate
+For private repositories, check the following:
+Authentication: https://github.com/microsoft/fabrikate/blob/master/docs/auth.md
+For more information on how components are structured, check the following:
+Component Model: https://github.com/microsoft/fabrikate/blob/master/docs/component.md''' # noqa
+
 
 def generate_HLD(component, output, comment_indeces=None):
     """Create HLD yaml file.
@@ -20,6 +28,7 @@ def generate_HLD(component, output, comment_indeces=None):
     d = component.asdict()
     if comment_indeces:
         d = CommentedMap(d)
+        d.yaml_set_start_comment(TOP_LVL_COMMENT)
         lst = CommentedSeq(d["subcomponents"])
         for idx, comment in comment_indeces:
             lst.yaml_set_comment_before_after_key(idx, comment, OFFSET)

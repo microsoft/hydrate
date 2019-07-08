@@ -66,6 +66,14 @@ class Component():
                 delattr(self, key)
 
 
+NO_MATCH_STR = '''No Match Deployments
+In order to use these deployments with Fabrikate, follow the steps below.
+1. Populate the source (git repository link)
+2. Add a path field (path within the git repository) ex: "path: stable/"
+3. Specify helm for applications generated using a Helm chart ex: "type: helm"
+Otherwise, comment them out to prevent errors with Fabrikate generation.'''
+
+
 def match_components(repo_components, cluster_components):
     """Match cluster and repo components."""
     subcomponents = []
@@ -81,7 +89,7 @@ def match_components(repo_components, cluster_components):
 
     if fm_leftovers:
         subcomponents.extend(fm_leftovers)
-        category_indeces.append((len(full_matches), "No Match Deployments"))
+        category_indeces.append((len(full_matches), NO_MATCH_STR))
 
     return subcomponents, category_indeces
 
