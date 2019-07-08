@@ -1,4 +1,5 @@
 """Use to construct the High-Level Deployment."""
+from .comments import TOP_LEVEL_COMMENT
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from ruamel.yaml import YAML
 yaml = YAML()
@@ -20,6 +21,7 @@ def generate_HLD(component, output, comment_indeces=None):
     d = component.asdict()
     if comment_indeces:
         d = CommentedMap(d)
+        d.yaml_set_start_comment(TOP_LEVEL_COMMENT)
         lst = CommentedSeq(d["subcomponents"])
         for idx, comment in comment_indeces:
             lst.yaml_set_comment_before_after_key(idx, comment, OFFSET)

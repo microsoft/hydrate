@@ -1,6 +1,7 @@
 """Fabrikate Component Class Definition."""
 
 from copy import deepcopy
+from .comments import NO_MATCH_COMMENT
 
 
 class Component():
@@ -81,7 +82,7 @@ def match_components(repo_components, cluster_components):
 
     if fm_leftovers:
         subcomponents.extend(fm_leftovers)
-        category_indeces.append((len(full_matches), "No Match Deployments"))
+        category_indeces.append((len(full_matches), NO_MATCH_COMMENT))
 
     return subcomponents, category_indeces
 
