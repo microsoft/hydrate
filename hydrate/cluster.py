@@ -35,7 +35,7 @@ class Cluster():
 
         """
         components = []
-        default_deps = self.get_namespaced_deployments("default")
+        default_deployments = self.get_namespaced_deployments("default")
         namespaces = self.get_namespaces()
         namespaces = self.remove_defaults(namespaces)
         # Scenario where cluster applications live in namespaces
@@ -43,9 +43,8 @@ class Cluster():
             first_words = [get_first_word(name) for name in namespaces]
             components.extend([Component(word) for word in first_words])
         # Scenario where cluster applications live in default
-        if default_deps:
-            dep_names = [
-                re.sub(r'-deployment', '', dep) for dep in default_deps]
+        if default_deployments:
+            dep_names = [re.sub(r'-deployment', '', d) for d in default_deployments]
             components.extend([Component(n) for n in dep_names])
 
         return components

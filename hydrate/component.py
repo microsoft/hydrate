@@ -1,57 +1,69 @@
-"""Fabrikate Component Class Definition."""
+'''Fabrikate Component Class Definition.'''
 
 from copy import deepcopy
-from .comments import NO_MATCH_COMMENT
 
 
 class Component():
-    """Hold the information for fabrikate High-Level Deployment(HLD)."""
+    '''Hold the information for fabrikate High-Level Deployment(HLD).'''
 
-    def __init__(self, name, generator=None, source="<source repository url>",
-                 method="git", path=None, version=None, branch=None,
-                 hooks=None, repositories=None, subcomponents=None):
-        """Instantiate a Component object.
+    def __init__(self, component=None, name='hydrated-component', generator=None,
+                 source='<source repository url>', method='git', path=None,
+                 version=None, branch=None, hooks=None, repositories=None,
+                 subcomponents=None):
+        '''Instantiate a Component object.
 
         Args:
-            name: string name of component
-            generator: string type of manifest generation(default:static)
+            component: Component object to make a copy of
+            name: string name of component(default:hydrated-component)
+            generator: string type of manifest generation(default:None)
+            source: string url to repository(default:<source repository url>)
             method: string type of retrieval (default:git)
+            path: string path in repository to component
+            version: string commit hash representing
 
-        """
-        self.name = name
-        self.generator = generator
-        self.source = source
-        self.method = method
-        self.path = path
-        self.version = version
-        self.branch = branch
-        self.hooks = hooks
-        self.repositories = repositories
-        self.subcomponents = subcomponents
+        '''
+        if isinstance(component, Component):
+            self.__dict__ = deepcopy(component.__dict__)
+        else:
+            self.name = name
+            self.generator = generator
+            self.source = source
+            self.method = method
+            self.path = path
+            self.version = version
+            self.branch = branch
+            self.hooks = hooks
+            self.repositories = repositories
+            self.subcomponents = subcomponents
 
     def __eq__(self, other):
-        """Override the default __eq__."""
+        '''Override the default __eq__.'''
         if type(other) is type(self):
             return self.__dict__ == other.__dict__
         return False
 
     def __str__(self):
-        """Name of the Component."""
+        '''Name of the Component.'''
         return self.name
 
     # How the class is represented in yaml
     yaml_tag = u'Component'
 
+    def as_yaml(self):
+        '''Return dict of Component suitable for dumping to yaml.'''
+        self.delete_none_attrs()
+        return self.asdict()
+
     def asdict(self):
-        """Return dict of Component."""
+        '''Return dict of Component.'''
         d = dict()
         try:
             if self.subcomponents:
                 d = {key: value for key, value in self.__dict__.items()
-                     if key != "subcomponents"}
-                d["subcomponents"] = []
+                     if key != 'subcomponents'}
+                d['subcomponents'] = []
                 for subcomponent in self.subcomponents:
-                    d["subcomponents"].append(subcomponent.asdict())
+                    d['subcomponents'].append(subcomponent.asdict())
             else:
                 d = {key: value for key, value in self.__dict__.items()}
         except AttributeError:
@@ -59,7 +71,7 @@ class Component():
         return d
 
     def delete_none_attrs(self):
-        """Remove attributes with value of None."""
+        '''Remove attributes with value of None.'''
         attr_dict = deepcopy(self.__dict__)
 
         for key, value in attr_dict.items():
@@ -67,48 +79,47 @@ class Component():
                 delattr(self, key)
 
 
-def match_components(repo_components, cluster_components):
-    """Match cluster and repo components."""
-    subcomponents = []
-    category_indeces = []
-    rc = repo_components
-    cc = cluster_components
-    full_matches, fm_leftovers = get_full_matches(rc, cc)
-
-    # Indeces are determined by the length of the previous category
-    if full_matches:
-        subcomponents.extend(full_matches)
-        category_indeces.append((0, "Full Match Components"))
-
-    if fm_leftovers:
-        subcomponents.extend(fm_leftovers)
-        category_indeces.append((len(full_matches), NO_MATCH_COMMENT))
-
-    return subcomponents, category_indeces
+class TopComponent(Component):
+    '''Top Level Component subclass.'''
+    def __init__(self, **kwargs):
+        Component.__init__(self,
+                           generator='static',
+                           source=None,
+                           method=None,
+                           path='./manifests',
+                           **kwargs)
 
 
-def get_full_matches(repo_components, cluster_components):
-    """Determine which components fully match the cluster.
+class CommentedComponent(Component):
+    '''Component with inline comment string.'''
 
-    Returns:
-        full_matches: list of components
-        leftovers: list of components
+    def __init__(self, inline_comment, component=None, **kwargs):
+        '''Instantiate a CommentedComponent object.'''
+        self.inline_comment = inline_comment
 
-    """
-    full_matches = []
-    cluster_set = set()
-    leftovers = None
-    for cc in cluster_components:
-        cluster_set.add(cc.name)
-    for rc in repo_components:
-        repo_set = set(rc.name.split('-'))
-        if repo_set <= cluster_set:
-            # Full match. Every name for this component is in the cluster.
-            cluster_set -= repo_set
-            full_matches.append(rc)
+        if isinstance(component, Component):
+            Component.__init__(self, component)
+        else:
+            Component.__init__(self, **kwargs)
 
-    if cluster_set:
-        print("Leftover deployments in cluster: {}".format(cluster_set))
-        leftovers = [cc for cc in cluster_components if cc.name in cluster_set]
+    def remove_comment(self):
+        '''Set self.inline_comment to None.
+        Useful when dumping the component object to remove extra information.
 
-    return full_matches, leftovers
+        '''
+        delattr(self, 'inline_comment')
+
+    def as_yaml(self):
+        '''Return dict of Component suitable for dumping to yaml.'''
+        self.remove_comment()
+        self.delete_none_attrs()
+        return self.asdict()
+
+
+class ComponentCategory():
+    '''Category that encompasses components.'''
+
+    def __init__(self, top_comment, components):
+        '''Instantiate a ComponentCategory object.'''
+        self.top_comment = top_comment
+        self.components = components
