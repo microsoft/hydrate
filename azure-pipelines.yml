@@ -27,7 +27,7 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    pip install pytest 
+    pip install pytest
     pip install pytest-azurepipelines
     pip install pytest-cov
     pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
@@ -37,10 +37,10 @@ steps:
     pip install pycodestyle
     pip install pydocstyle
     pip install pyflakes
-    python -m pycodestyle hydrate/*.py
+    python -m pycodestyle --max-line-length 90 hydrate/*.py
     python -m pydocstyle hydrate/*.py
     python -m pyflakes hydrate/*.py
-    python -m pycodestyle tests/*.py
+    python -m pycodestyle --max-line-length 90 tests/*.py
     python -m pydocstyle tests/*.py
     python -m pyflakes tests/*.py
   displayName: 'CSE linting packages (pycodestyle, pydocstyle, pyflakes)'
