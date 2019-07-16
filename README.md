@@ -1,4 +1,6 @@
 # Hydrate
+[![Build Status](https://dev.azure.com/epicstuff/hydrate/_apis/build/status/microsoft.hydrate?branchName=master)](https://dev.azure.com/epicstuff/hydrate/_build/latest?definitionId=98&branchName=master)
+
 Hydrate crawls a kubernetes cluster and generates a high level description of your deployments.
 
 ## Setup
