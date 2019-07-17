@@ -60,10 +60,10 @@ def test_parse_json(json_list, exp_json_data):
     assert parse_json(json_list) == exp_json_data
 
 
-exp_new_components = [Component("Test1",
+exp_new_components = [Component(name="Test1",
                                 source=FAB_DEFS_URL,
                                 path="www.test1.com"),
-                      Component("Test2",
+                      Component(name="Test2",
                                 source=FAB_DEFS_URL,
                                 path="www.test2.com")]
 @pytest.mark.parametrize('tst_json_data, exp_components',
@@ -73,12 +73,12 @@ def test_construct_components(tst_json_data, exp_components):
     assert construct_components(tst_json_data) == exp_components
 
 
-tst_fab_comps = [Component("fabrikate-test-component"),
-                 Component("fabrikate-test-component2"),
-                 Component("test-component3")]
-exp_no_fab_comps = [Component("test-component"),
-                    Component("test-component2"),
-                    Component("test-component3")]
+tst_fab_comps = [Component(name="fabrikate-test-component"),
+                 Component(name="fabrikate-test-component2"),
+                 Component(name="test-component3")]
+exp_no_fab_comps = [Component(name="test-component"),
+                    Component(name="test-component2"),
+                    Component(name="test-component3")]
 
 @pytest.mark.parametrize('components, exp_components',
                          [(tst_fab_comps, exp_no_fab_comps)])
