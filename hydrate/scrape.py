@@ -9,10 +9,12 @@ FAB_DEFS_URL = "https://github.com/microsoft/fabrikate-definitions"
 API = "https://api.github.com/repos/microsoft/fabrikate-definitions/contents/definitions"
 FAB_DEFS_API = API
 
+
 class Scraper():
-    '''Scrapes GitHub for Fabrikate-Definitions.'''
+    """Scrapes GitHub for Fabrikate-Definitions."""
 
     def __init__(self, definition_url=FAB_DEFS_URL, definition_api=FAB_DEFS_API):
+        """Construct Scraper object."""
         self.definition_url = definition_url
         self.definition_api = definition_api
         self.repo_components = None

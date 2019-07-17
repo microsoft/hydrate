@@ -68,6 +68,7 @@ class Cluster():
 
         Return:
             deployment_list: list of pods found in the namespace.
+
         """
         if namespace in self.namespaced_deployments:
             return self.namespaced_deployments[namespace]
@@ -85,6 +86,7 @@ class Cluster():
 
         Return:
             pod_list: list of pods found in the namespace.
+
         """
         if namespace in self.namespaced_pods:
             return self.namespaced_pods[namespace]

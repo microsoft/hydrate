@@ -12,10 +12,12 @@ from pathlib import Path
 
 from .hld import HLD_Generator
 
+
 def main(args):
     """Generate the HLD for the cluster."""
     hydrator = HLD_Generator(args)
     hydrator.generate()
+
 
 def parse_args():
     """Parse command line arguments."""

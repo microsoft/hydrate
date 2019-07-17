@@ -1,4 +1,4 @@
-'''Provide class to match cluster objects with Fabrikate component definitions.'''
+"""Provide class to match cluster objects with Fabrikate component definitions."""
 
 from collections import namedtuple
 from .comments import FULL_MATCH_COMMENT
@@ -7,20 +7,21 @@ from .comments import NO_MATCH_COMMENT
 
 
 class Matcher():
-    '''Match the deployments found on a cluster with the Fabrikate Definitions.'''
+    """Match the deployments found on a cluster with the Fabrikate Definitions."""
 
     def __init__(self, repo_components):
-        '''Instantiate a Matcher object.
+        """Instantiate a Matcher object.
 
         Args:
             repo_components: list of Component objects
 
-        '''
+        """
         self.repo_components = repo_components
         self.match_categories = []
 
     def match_components(self, cluster_components):
         """Generate cluster and repo component matches.
+
         Overwrites existing match_categories attribute.
 
         Args:
@@ -61,7 +62,7 @@ class Matcher():
         return self.match_categories
 
     def get_start_index(self):
-        '''Calculate start_index based on the last MatchCategory in the list.'''
+        """Calculate start_index based on the last MatchCategory in the list."""
         start_idx = 0
         if self.match_categories:
             start_idx = len(self.match_categories[-1].subcomponents) \
@@ -92,7 +93,6 @@ class Matcher():
             leftovers = [cc for cc in cluster_components if cc.name in cluster_set]
 
         return FullMatchResults(full_matches, leftovers)
-
 
     def get_partial_matches(self, full_match_leftovers):
         """Determine which components partially match the cluster.
