@@ -23,7 +23,7 @@ class Component():
 
         """
         if isinstance(component, Component):
-            self.__dict__ = deepcopy(component.__dict__)
+            self.__dict__ = {**self.__dict__, **deepcopy(component.__dict__)}
         else:
             self.name = name
             self.generator = generator
@@ -51,6 +51,7 @@ class Component():
 
     def as_yaml(self):
         """Return dict of Component suitable for dumping to yaml."""
+        self.delete_non_default_attributes()
         self.delete_none_attrs()
         return self.asdict()
 
@@ -69,6 +70,16 @@ class Component():
         except AttributeError:
             d = {key: value for key, value in self.__dict__.items()}
         return d
+
+    def delete_non_default_attributes(self):
+        """Remove non-default attributes from the instance."""
+        DEFAULT_ATTRIBUTES = {'name', 'generator', 'source', 'method', 'path', 'version',
+                              'branch', 'hooks', 'repositories', 'subcomponents'}
+        attr_dict = deepcopy(self.__dict__)
+
+        for key in attr_dict:
+            if key not in DEFAULT_ATTRIBUTES:
+                delattr(self, key)
 
     def delete_none_attrs(self):
         """Remove attributes with value of None."""
@@ -95,34 +106,7 @@ class TopComponent(Component):
 class CommentedComponent(Component):
     """Component with inline comment string."""
 
-    def __init__(self, inline_comment, component=None, **kwargs):
+    def __init__(self, inline_comment, **kwargs):
         """Instantiate a CommentedComponent object."""
         self.inline_comment = inline_comment
-
-        if isinstance(component, Component):
-            Component.__init__(self, component)
-        else:
-            Component.__init__(self, **kwargs)
-
-    def remove_comment(self):
-        """Set self.inline_comment to None.
-
-        Useful when dumping the component object to remove extra information.
-
-        """
-        delattr(self, 'inline_comment')
-
-    def as_yaml(self):
-        """Return dict of Component suitable for dumping to yaml."""
-        self.remove_comment()
-        self.delete_none_attrs()
-        return self.asdict()
-
-
-class ComponentCategory():
-    """Category that encompasses components."""
-
-    def __init__(self, top_comment, components):
-        """Instantiate a ComponentCategory object."""
-        self.top_comment = top_comment
-        self.components = components
+        Component.__init__(self, **kwargs)

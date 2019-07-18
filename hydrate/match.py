@@ -1,6 +1,8 @@
 """Provide class to match cluster objects with Fabrikate component definitions."""
 
+from enum import Enum
 from collections import namedtuple
+from .component import CommentedComponent
 from .comments import FULL_MATCH_COMMENT
 from .comments import PARTIAL_MATCH_COMMENT
 from .comments import NO_MATCH_COMMENT
@@ -33,31 +35,33 @@ class Matcher():
 
         """
         MatchCategory = namedtuple('MatchCategory',
-                                   ['category', 'start_index', 'subcomponents'])
+                                   ['top_comment', 'start_index', 'matches'])
         self.match_categories = []
 
         FullMatchResults = self.get_full_matches(cluster_components)
 
         if FullMatchResults.full_matches:
             self.match_categories.append(
-                MatchCategory(category=FULL_MATCH_COMMENT,
+                MatchCategory(top_comment=FULL_MATCH_COMMENT,
                               start_index=self.get_start_index(),
-                              subcomponents=FullMatchResults.full_matches))
+                              matches=FullMatchResults.full_matches))
 
         if FullMatchResults.leftovers:
             PartialMatchResults = self.get_partial_matches(FullMatchResults.leftovers)
 
             if PartialMatchResults.partial_matches:
                 self.match_categories.append(
-                    MatchCategory(category=PARTIAL_MATCH_COMMENT,
+                    MatchCategory(top_comment=PARTIAL_MATCH_COMMENT,
                                   start_index=self.get_start_index(),
-                                  subcomponents=PartialMatchResults.partial_matches))
+                                  matches=PartialMatchResults.partial_matches))
 
             if PartialMatchResults.leftovers:
+                NoMatchResults = self.get_no_matches(PartialMatchResults.leftovers)
+
                 self.match_categories.append(
-                    MatchCategory(category=NO_MATCH_COMMENT,
+                    MatchCategory(top_comment=NO_MATCH_COMMENT,
                                   start_index=self.get_start_index(),
-                                  subcomponents=PartialMatchResults.leftovers))
+                                  matches=NoMatchResults))
 
         return self.match_categories
 
@@ -65,7 +69,7 @@ class Matcher():
         """Calculate start_index based on the last MatchCategory in the list."""
         start_idx = 0
         if self.match_categories:
-            start_idx = len(self.match_categories[-1].subcomponents) \
+            start_idx = len(self.match_categories[-1].matches) \
                         + self.match_categories[-1].start_index
         return start_idx
 
@@ -81,13 +85,20 @@ class Matcher():
         FullMatchResults = namedtuple('FullMatchResults', ['full_matches', 'leftovers'])
         full_matches = []
         leftovers = None
-        cluster_set = {cc.name for cc in cluster_components}
+        cluster_map = {cc.name: cc for cc in cluster_components}
+        cluster_set = set(cluster_map.keys())
 
         for rc in self.repo_components:
             repo_set = set(rc.name.split('-'))
             if repo_set.issubset(cluster_set):
+                cc_names = cluster_set.intersection(repo_set)
+                cluster_matches = [cluster_map[component_name] for component_name in cc_names]
                 cluster_set.difference_update(repo_set)
-                full_matches.append(rc)
+
+                full_matches.append(
+                    Match(category=MatchCategory.FULL_MATCH,
+                          cluster_matches=cluster_matches,
+                          repo_match=rc))
 
         if cluster_set:
             leftovers = [cc for cc in cluster_components if cc.name in cluster_set]
@@ -108,23 +119,75 @@ class Matcher():
 
         """
         PartialMatchResults = namedtuple('PartialMatchResults', ['partial_matches', 'leftovers'])
-        PartialMatch = namedtuple('PartialMatch', ['cluster_components', 'repo_component'])
 
         partial_matches = []
         leftovers = None
-
-        cluster_name_set = {leftover.name for leftover in full_match_leftovers}
+        cluster_map = {cc.name: cc for cc in full_match_leftovers}
+        cluster_name_set = set(cluster_map.keys())
 
         for repo_component in self.repo_components:
             repo_component_name_set = set(repo_component.name.split('-'))
-            common_component_names = repo_component_name_set.intersection(cluster_name_set)
-            if common_component_names:
+            common_names = repo_component_name_set.intersection(cluster_name_set)
+
+            if common_names:
+                cluster_name_set.difference_update(common_names)
+                cluster_matches = [cluster_map[c_name] for c_name in common_names]
+
                 partial_matches.append(
-                    PartialMatch(cluster_components=sorted(common_component_names),
-                                 repo_component=repo_component))
-                cluster_name_set.difference_update(common_component_names)
+                    Match(category=MatchCategory.PARTIAL_MATCH,
+                          cluster_matches=cluster_matches,
+                          repo_match=repo_component))
 
         if cluster_name_set:
             leftovers = [cc for cc in full_match_leftovers if cc.name in cluster_name_set]
 
         return PartialMatchResults(partial_matches, leftovers)
+
+    def get_no_matches(self, partial_match_leftovers):
+        """Process the components that don't match existing definitions."""
+        NoMatchResults = []
+
+        if partial_match_leftovers:
+            for component in partial_match_leftovers:
+                NoMatchResults.append(
+                    Match(category=MatchCategory.NO_MATCH,
+                          cluster_matches=component))
+
+        return NoMatchResults
+
+
+class MatchCategory(Enum):
+    """Flags for different kinds of matches."""
+
+    FULL_MATCH = 1
+    PARTIAL_MATCH = 2
+    NO_MATCH = 3
+
+
+class Match():
+    """Match base class.
+
+    Args:
+        category: MatchCategory enum
+        cluster_matches: list of Components
+        repo_match: Component or None
+
+    """
+
+    def __init__(self, category=None, cluster_matches=[], repo_match=None):
+        """See help(Match)."""
+        self.category = category
+        self.cluster_matches = cluster_matches
+        self.repo_match = repo_match
+
+    def get_component(self):
+        """Return the component from the Match."""
+        if self.category == MatchCategory.FULL_MATCH:
+            return self.repo_match
+        if self.category == MatchCategory.PARTIAL_MATCH:
+            inline_comment = "Cluster Components: "
+            inline_comment += ", ".join([cc.name for cc in self.cluster_matches])
+            return CommentedComponent(inline_comment=inline_comment,
+                                      component=self.repo_match)
+        if self.category == MatchCategory.NO_MATCH:
+            return self.cluster_matches

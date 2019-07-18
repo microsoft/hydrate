@@ -2,7 +2,6 @@
 from .comments import TOP_LEVEL_COMMENT
 from .cluster import Cluster
 from .component import TopComponent
-from .component import CommentedComponent
 from .scrape import Scraper
 from .match import Matcher
 
@@ -87,22 +86,40 @@ class HLD_Generator():
             with open(output_file, 'w') as of:
                 self.dump_yaml(data, of)
 
+    def _matches_to_components(self, matches):
+        """Get the components from the matches."""
+        subcomponents = []
+        for match in matches:
+            subcomponents.append(match.get_component())
+        return subcomponents
+
     def _set_subcomponents(self, match_categories):
         """Set subcomponents for the top component from the match categories."""
         data = CommentedMap(self.top_component.as_yaml())
         data.yaml_set_start_comment(TOP_LEVEL_COMMENT)
-        tmp_lst = CommentedSeq()
+        temp_list = CommentedSeq()
 
         # Set the subcomponents and comments
-        for category, start_index, subcomponents in match_categories:
-            for subcomponent in subcomponents:
-                comment = None
-                if isinstance(subcomponent, CommentedComponent):
-                    comment = subcomponent.inline_comment
-                tmp_lst.append(subcomponent.as_yaml(), comment=comment)
-            tmp_lst.yaml_set_comment_before_after_key(start_index, category, OFFSET)
-        data['subcomponents'] = tmp_lst
+        for top_comment, start_index, matches in match_categories:
+            components = self._matches_to_components(matches)
 
+            for subcomponent in components:
+                try:  # Extract inline comment before it's removed
+                    inline_comment = subcomponent.inline_comment
+                except AttributeError:
+                    inline_comment = None
+
+                d2 = CommentedMap(subcomponent.as_yaml())
+
+                if inline_comment:  # Apply inline comment to data
+                    d2.yaml_add_eol_comment(comment=inline_comment,
+                                            key='name')
+                temp_list.append(d2)
+
+            temp_list.yaml_set_comment_before_after_key(key=start_index,
+                                                        before=top_comment,
+                                                        indent=OFFSET)
+        data['subcomponents'] = temp_list
         return data
 
     def dump_yaml(self, data, output):

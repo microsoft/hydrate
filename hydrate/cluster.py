@@ -41,11 +41,11 @@ class Cluster():
         # Scenario where cluster applications live in namespaces
         if namespaces:
             first_words = [get_first_word(name) for name in namespaces]
-            components.extend([Component(word) for word in first_words])
+            components.extend([Component(name=word) for word in first_words])
         # Scenario where cluster applications live in default
         if default_deployments:
             dep_names = [re.sub(r'-deployment', '', d) for d in default_deployments]
-            components.extend([Component(n) for n in dep_names])
+            components.extend([Component(name=name) for name in dep_names])
 
         return components
 

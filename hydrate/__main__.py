@@ -7,6 +7,7 @@ Functions:
     - parse_args()
 """
 import os
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -19,7 +20,7 @@ def main(args):
     hydrator.generate()
 
 
-def parse_args():
+def parse_args(args):
     """Parse command line arguments."""
     parser = ArgumentParser(
         description='Generate a component.yaml file for your cluster.')
@@ -52,9 +53,9 @@ def parse_args():
         action='store_true',
         help='Print component.yaml to the terminal.')
 
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 if __name__ == '__main__':
-    args = parse_args()
+    args = parse_args(sys.argv[1:])
     main(args)

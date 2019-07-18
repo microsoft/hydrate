@@ -8,7 +8,8 @@ from hydrate.hld import HLD_Generator
 
 
 class Test_HLD_Generator():
-    '''Test Suite for the HLD_Generator class.'''
+    """Test Suite for the HLD_Generator class."""
+
     MODULE = 'hydrate.hld'
     CLASS = f'{MODULE}.HLD_Generator'
     tst_args = namedtuple('tst_args', ['name',
@@ -23,9 +24,8 @@ class Test_HLD_Generator():
     class_tst_args.output = "tst_output"
     class_tst_args.verbose = "tst_verbose"
 
-
     def test_generate(self, mocker):
-        '''Test the generate method.'''
+        """Test the generate method."""
         # Setup, mock, etc.
         tst_hld_generator = HLD_Generator(self.tst_args)
         tst_cluster_components = [Component(name='test-comp-1'),
@@ -49,7 +49,7 @@ class Test_HLD_Generator():
         mock_gen_HLD.assert_called_once()
 
     def test_get_cluster_components(self, mocker):
-        '''Test the _get_cluster_components method.'''
+        """Test the _get_cluster_components method."""
         # Setup, mock, etc.
         tst_hld_generator = HLD_Generator(self.tst_args)
         mock_cluster = mocker.patch.object(tst_hld_generator, 'cluster')
@@ -63,21 +63,22 @@ class Test_HLD_Generator():
         mock_cluster.connect_to_cluster.assert_called_once()
         mock_cluster.get_components.assert_called_once()
 
-    # TODO
     def test_get_component_definitions(self, mocker):
-        '''Test the _get_component_definitions method.'''
+        """Test the _get_component_definitions method."""
         # Setup, mock, etc.
         tst_hld_generator = HLD_Generator(self.tst_args)
-        mock_scraper = mocker.patch(f'{self.CLASS}.scraper.get_repo_components')
+        mock_scraper = mocker.patch(f'{self.MODULE}.Scraper')
+        mock_scraper.return_value.get_repo_components = mocker.MagicMock()
 
         # Call function
         tst_hld_generator._get_component_definitions()
 
         # Assert results
-        mock_scraper.get_repo_components.assert_called_once()
+        mock_scraper.assert_called_once()
+        mock_scraper.return_value.get_repo_components.assert_called_once()
 
     def test_get_matches(self, mocker):
-        '''Test the _get_matches method.'''
+        """Test the _get_matches method."""
         # Setup, mock, etc.
         tst_hld_generator = HLD_Generator(self.tst_args)
         tst_cc = [Component("Test-Component")]
@@ -90,24 +91,45 @@ class Test_HLD_Generator():
         # Assert results
         mock_matcher.match_components.assert_called_once()
 
-    # TODO
-    def test_generate_HLD(self):
-        '''Test the _generate_HLD method.'''
-        # Setup, mock, etc.
-        # Call function
-        # Assert results
-        pass
+    tst_args_1 = tst_args(dry_run=True,
+                          name=None, kubeconfig=None, output=None, verbose=None)
+    tst_args_2 = tst_args(output=True,
+                          name=None, kubeconfig=None, dry_run=None, verbose=None)
 
-    # TODO
+    gen_hld_tst_args = [tst_args_1, tst_args_2]
+
+    @pytest.mark.parametrize('tst_args', gen_hld_tst_args)
+    def test_generate_HLD(self, mocker, tst_args):
+        """Test the _generate_HLD method."""
+        # Setup, mock, etc.
+        tst_hld_generator = HLD_Generator(tst_args)
+        tst_data = "test-data"
+        tst_match_categories = ["full", "partial", "none"]
+        mock_stdout = mocker.patch(f'{self.MODULE}.stdout')
+        mock_set_subcomponents = mocker.patch(f'{self.CLASS}._set_subcomponents',
+                                              return_value=tst_data)
+        mock_dump_yaml = mocker.patch(f'{self.CLASS}.dump_yaml',
+                                      return_value=None)
+
+        # Call function
+        tst_hld_generator._generate_HLD(tst_match_categories)
+
+        # Assert results
+        mock_set_subcomponents.assert_called()
+        if tst_args.dry_run:
+            mock_dump_yaml.assert_called_with(tst_data, mock_stdout)
+        mock_dump_yaml.assert_called_once()
+
     def test_set_subcomponents(self):
-        '''Test the _set_subcomponents method.'''
+        """Test the _set_subcomponents method."""
+        # TODO
         # Setup, mock, etc.
         # Call function
         # Assert results
         pass
 
     def test_dump_yaml(self, mocker):
-        '''Test the _dump_yaml method.'''
+        """Test the dump_yaml method."""
         # Setup, mock, etc.
         tst_hld_generator = HLD_Generator(self.tst_args)
         tst_data = {"key": "value"}
@@ -118,7 +140,7 @@ class Test_HLD_Generator():
         mock_yaml.dump = mocker.MagicMock()
 
         # Call function
-        tst_hld_generator._dump_yaml(tst_data, tst_output)
+        tst_hld_generator.dump_yaml(tst_data, tst_output)
 
         # Assert results
         mock_yaml.indent.assert_called_once()

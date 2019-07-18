@@ -1,15 +1,15 @@
 """Test suite for component.py."""
-import pytest
-from itertools import zip_longest
+
 from copy import deepcopy
 
-from hydrate.component import Component, get_full_matches
+from hydrate.component import Component
+from hydrate.component import TopComponent
 
 
 class TestComponent():
     """Test Suite for Component Class."""
 
-    tst_component = Component("Test")
+    tst_component = Component(name="Test")
     exp_component_asdict = {"name": tst_component.name,
                             "generator": tst_component.generator,
                             "source": tst_component.source,
@@ -22,9 +22,9 @@ class TestComponent():
                             "subcomponents": tst_component.subcomponents
                             }
 
-    tst_component_none_attrs = Component("NoneAttrs")
+    tst_component_none_attrs = Component(name="NoneAttrs")
 
-    exp_component_none_attrs = Component("NoneAttrs")
+    exp_component_none_attrs = Component(name="NoneAttrs")
     attr_dict = deepcopy(exp_component_none_attrs.__dict__)
     for key, value in attr_dict.items():
         if value is None:
@@ -39,34 +39,21 @@ class TestComponent():
         self.tst_component_none_attrs.delete_none_attrs()
         assert self.tst_component_none_attrs == self.exp_component_none_attrs
 
+    def test_delete_non_default_attributes(self):
+        """Test the delete_non_default_attributes method."""
+        tst_component = Component(name="test-component")
+        tst_component.x = "Should be removed"
 
-tst_cluster_components = [Component("dep1"),
-                          Component("dep2"),
-                          Component("dep3"),
-                          Component("dep4"),
-                          Component("dep6")]
-tst_repo_components = [Component("dep1-dep2"),
-                       Component("dep3"),
-                       Component("dep4-dep5")]
-exp_full_matches = [Component("dep1-dep2"),
-                    Component("dep3")]
-exp_leftovers = [Component("dep4"),
-                 Component("dep6")]
+        tst_component.delete_non_default_attributes()
+
+        assert not hasattr(tst_component, 'x')
 
 
-@pytest.mark.parametrize('''repo_components, cluster_components,
-                            expected_fm, expected_leftos''',
-                         [(tst_repo_components,
-                           tst_cluster_components,
-                           exp_full_matches,
-                           exp_leftovers)])
-def test_get_full_matches(repo_components, cluster_components,
-                          expected_fm, expected_leftos):
-    """Test get_full_matches()."""
-    fms, leftos = get_full_matches(repo_components, cluster_components)
+def test_TopComponent():
+    """Test the TopComponent class."""
+    tst_top_component = TopComponent(name="test-TopComponent")
 
-    for fmc, exp in zip_longest(fms, exp_full_matches):
-        assert fmc.name == exp.name
-
-    for lefto, exp_lefto in zip_longest(leftos, exp_leftovers):
-        assert lefto.name == exp_lefto.name
+    assert tst_top_component.generator == 'static'
+    assert tst_top_component.source is None
+    assert tst_top_component.method is None
+    assert tst_top_component.path == './manifests'
