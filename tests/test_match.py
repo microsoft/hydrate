@@ -33,7 +33,7 @@ class TestMatcher():
                         Component(name="dep8")]
     exp_partial_matches = [Component(name="dep4-dep5"),
                            Component(name="dep6-dep7")]
-    exp_pm_leftovers = [Component(name="dep8")]
+    exp_pm_no_matches = [Component(name="dep8")]
     exp_no_matches = [Component(name="dep8")]
 
     def test_init(self):
@@ -81,29 +81,29 @@ class TestMatcher():
             assert lefto.name == exp_leftover.name
 
     @pytest.mark.parametrize("""repo_components, cluster_components,
-                                expected_pm, expected_leftovers""",
+                                expected_pm, expected_no_matches""",
                              [(tst_repo_components,
                                exp_fm_leftovers,
                                exp_partial_matches,
-                               exp_pm_leftovers)])
+                               exp_pm_no_matches)])
     def test_get_partial_matches(self, repo_components, cluster_components,
-                                 expected_pm, expected_leftovers):
+                                 expected_pm, expected_no_matches):
         """Test the get_partial_matches method."""
         pm_results = self.tst_matcher.get_partial_matches(cluster_components)
 
         pms = pm_results.partial_matches
-        leftovers = pm_results.leftovers
+        no_matches = pm_results.no_matches
 
         for partial_match, exp in zip_longest(pms, expected_pm):
             assert partial_match.get_component().name == exp.name
 
-        for leftover, exp_leftover in zip_longest(leftovers, expected_leftovers):
-            assert leftover.name == exp_leftover.name
+        for no_match, exp_leftover in zip_longest(no_matches, expected_no_matches):
+            assert no_match.name == exp_leftover.name
 
     @pytest.mark.parametrize("""repo_components, cluster_components,
                                 expected_nm""",
                              [(tst_repo_components,
-                               exp_pm_leftovers,
+                               exp_pm_no_matches,
                                exp_no_matches)])
     def test_get_no_matches(self, repo_components, cluster_components,
                             expected_nm):

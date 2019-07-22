@@ -55,8 +55,8 @@ class Matcher():
                                   start_index=self.get_start_index(),
                                   matches=PartialMatchResults.partial_matches))
 
-            if PartialMatchResults.leftovers:
-                NoMatchResults = self.get_no_matches(PartialMatchResults.leftovers)
+            if PartialMatchResults.no_matches:
+                NoMatchResults = self.get_no_matches(PartialMatchResults.no_matches)
 
                 self.match_categories.append(
                     MatchCategory(top_comment=NO_MATCH_COMMENT,
@@ -118,10 +118,10 @@ class Matcher():
                 leftovers: list of components
 
         """
-        PartialMatchResults = namedtuple('PartialMatchResults', ['partial_matches', 'leftovers'])
+        PartialMatchResults = namedtuple('PartialMatchResults', ['partial_matches', 'no_matches'])
 
         partial_matches = []
-        leftovers = None
+        no_matches = None
         cluster_map = {cc.name: cc for cc in full_match_leftovers}
         cluster_name_set = set(cluster_map.keys())
 
@@ -139,9 +139,9 @@ class Matcher():
                           repo_match=repo_component))
 
         if cluster_name_set:
-            leftovers = [cc for cc in full_match_leftovers if cc.name in cluster_name_set]
+            no_matches = [cc for cc in full_match_leftovers if cc.name in cluster_name_set]
 
-        return PartialMatchResults(partial_matches, leftovers)
+        return PartialMatchResults(partial_matches, no_matches)
 
     def get_no_matches(self, partial_match_leftovers):
         """Process the components that don't match existing definitions."""
