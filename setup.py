@@ -1,11 +1,15 @@
 import setuptools
+import os.path
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
+version_file = open(os.path.join('hydrate', 'VERSION'))
+version = version_file.read().strip()
+
 setuptools.setup(
     name='hydrate',
-    version='0.4.0',
+    version=version,
     author='andrewDoing',
     author_email='andrew.doing@mst.edu',
     description='A package to generate an HLD for your kubernetes cluster',

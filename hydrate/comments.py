@@ -7,7 +7,13 @@ Fabrikate Docs: https://github.com/Microsoft/fabrikate
 For private repositories, check the following:
 Authentication: https://github.com/microsoft/fabrikate/blob/master/docs/auth.md
 For more information on how components are structured, check the following:
-Component Model: https://github.com/microsoft/fabrikate/blob/master/docs/component.md'''  # noqa
+Component Model: https://github.com/microsoft/fabrikate/blob/master/docs/component.md'''
+
+
+FULL_MATCH_COMMENT = '''Full Match Components'''
+
+
+PARTIAL_MATCH_COMMENT = '''Partial Match Components'''
 
 
 NO_MATCH_COMMENT = '''No Match Deployments
