@@ -3,6 +3,7 @@ from .comments import TOP_LEVEL_COMMENT
 from .cluster import Cluster
 from .component import TopComponent
 from .scrape import Scraper
+from .manifest import generate_manifests
 from .match import Matcher
 
 from sys import stdout
@@ -45,6 +46,8 @@ class HLD_Generator():
         match_categories = self._get_matches(cluster_components)
         # Step 3. Generate the HLD
         self._generate_HLD(match_categories)
+        # Step 4. Generate the manifests directory
+        self._generate_manifests()
 
     def _get_cluster_components(self):
         """Get objects living on the cluster."""
@@ -121,6 +124,11 @@ class HLD_Generator():
                                                         indent=OFFSET)
         data['subcomponents'] = temp_list
         return data
+
+    def _generate_manifests(self):
+        """Generate the manifests."""
+        namespaces = self.cluster.get_namespaces()
+        generate_manifests(namespaces)
 
     def dump_yaml(self, data, output):
         """Dump yaml to output."""

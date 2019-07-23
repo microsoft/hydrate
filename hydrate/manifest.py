@@ -1,6 +1,7 @@
 """Create manifest directory and populate it."""
 
 import os
+from io import StringIO
 from ruamel.yaml import YAML
 
 MAPPING = 2
@@ -27,7 +28,7 @@ class NamespaceYAML:
                 self.metadata == other.metadata)
 
 
-def generate_manifests(namespaces=None, directory="manifests"):
+def generate_manifests(namespaces=None, directory="manifests", dry_run=False):
     """Make and populate manifests directory.
 
     Creates the manifests directory if it doesn't already exist, and populates
@@ -39,13 +40,21 @@ def generate_manifests(namespaces=None, directory="manifests"):
         directory: string path (default:'manifests')
 
     """
-    _make_directory(directory)
-
     if namespaces:
-        namespaces_file = os.path.join(directory, "namespaces.yaml")
         data = _create_namespaces_data(namespaces)
-        with open(namespaces_file, 'w') as of:
+        if not dry_run:
+            _make_directory(directory)
+            namespaces_file = os.path.join(directory, "namespaces.yaml")
+            with open(namespaces_file, 'w') as of:
+                _generate_namespaces_yaml(data, of)
+        else:
+            print("Dry Run: namespaces.yaml:")
+            of = StringIO()
             _generate_namespaces_yaml(data, of)
+            of.seek(0)
+            print(of.read())
+    else:
+        raise Exception("Namespaces are None")
 
 
 def _make_directory(path):
