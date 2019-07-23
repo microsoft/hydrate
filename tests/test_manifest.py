@@ -9,6 +9,8 @@ from hydrate.manifest import _create_namespaces_data
 from hydrate.manifest import _generate_namespaces_yaml
 
 
+MODULE = "hydrate.manifest"
+
 def test_NamespaceYAML():
     """Test the NamespaceYAML class."""
     tst_data = NamespaceYAML("Test Namespace")
@@ -23,11 +25,12 @@ def test_generate_manifests(mocker, dry_run):
     tst_namespaces = ["test1", "test2", "test3"]
     mock_make_directory = mocker.patch("hydrate.manifest._make_directory")
     mock_create_namespaces_data = mocker.patch(
-        "hydrate.manifest._create_namespaces_data")
+        f"{MODULE}._create_namespaces_data")
     mock_generate_namespaces_yaml = mocker.patch(
-        "hydrate.manifest._generate_namespaces_yaml")
-    mock_ospath_join = mocker.patch(
-        "hydrate.manifest.os.path.join")
+        f"{MODULE}._generate_namespaces_yaml")
+    mock_open = mocker.patch(
+        f"builtins.open",
+        mocker.mock_open(read_data="test-data"))
 
     generate_manifests(namespaces=tst_namespaces, dry_run=dry_run)
 
@@ -35,7 +38,7 @@ def test_generate_manifests(mocker, dry_run):
     mock_generate_namespaces_yaml.assert_called_once()
     if not dry_run:
         mock_make_directory.assert_called_with("manifests")
-        mock_ospath_join.assert_called_once()
+        mock_open.assert_called_once()
 
 
 
