@@ -41,6 +41,17 @@ Arg | Usage
 -v, --verbose | Verbose output logs.
 -d, --dry-run | Print component.yaml to the terminal.
 
+## Running in Docker
+### Step 1. Build The Image
+Run the following command from the Hydrate project directory.
+```bash
+docker build --tag=image-name .
+```
+### Step 2. Run The Image
+```bash
+docker run [image-name] [args]
+```
+
 # Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
