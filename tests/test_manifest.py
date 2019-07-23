@@ -26,6 +26,8 @@ def test_generate_manifests(mocker, dry_run):
         "hydrate.manifest._create_namespaces_data")
     mock_generate_namespaces_yaml = mocker.patch(
         "hydrate.manifest._generate_namespaces_yaml")
+    mock_ospath_join = mocker.patch(
+        "hydrate.manifest.os.path.join")
 
     generate_manifests(namespaces=tst_namespaces, dry_run=dry_run)
 
@@ -33,6 +35,7 @@ def test_generate_manifests(mocker, dry_run):
     mock_generate_namespaces_yaml.assert_called_once()
     if not dry_run:
         mock_make_directory.assert_called_with("manifests")
+        mock_ospath_join.assert_called_once()
 
 
 
