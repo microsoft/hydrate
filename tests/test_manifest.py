@@ -1,5 +1,6 @@
 """Test the manifest.py file."""
 from io import StringIO
+import pytest
 
 from hydrate.manifest import NamespaceYAML
 from hydrate.manifest import generate_manifests
@@ -15,8 +16,9 @@ def test_NamespaceYAML():
     assert tst_data.kind == "Namespace"
     assert tst_data.metadata["name"] == "Test Namespace"
 
-
-def test_generate_manifests(mocker):
+tst_dry_run = [True, False]
+@pytest.mark.parametrize('dry_run', tst_dry_run)
+def test_generate_manifests(mocker, dry_run):
     """Test the generate_manifests function."""
     tst_namespaces = ["test1", "test2", "test3"]
     mock_make_directory = mocker.patch("hydrate.manifest._make_directory")
@@ -25,11 +27,13 @@ def test_generate_manifests(mocker):
     mock_generate_namespaces_yaml = mocker.patch(
         "hydrate.manifest._generate_namespaces_yaml")
 
-    generate_manifests(namespaces=tst_namespaces)
+    generate_manifests(namespaces=tst_namespaces, dry_run=dry_run)
 
-    mock_make_directory.assert_called_with("manifests")
     mock_create_namespaces_data.assert_called_with(tst_namespaces)
     mock_generate_namespaces_yaml.assert_called_once()
+    if not dry_run:
+        mock_make_directory.assert_called_with("manifests")
+
 
 
 def test_make_directory(mocker):
