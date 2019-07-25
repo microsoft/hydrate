@@ -45,7 +45,7 @@ Arg | Usage
 ### Step 1. Build The Image
 Run the following command from the Hydrate project directory.
 ```bash
-docker build --tag=image-name .
+docker build --tag=[image-name] .
 ```
 ### Step 2. Run The Image
 ```bash
