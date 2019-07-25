@@ -38,6 +38,7 @@ class Test_HLD_Generator():
                                    return_value=tst_repo_components)
         mock_get_matches = mocker.patch(f'{self.CLASS}._get_matches')
         mock_gen_HLD = mocker.patch(f'{self.CLASS}._generate_HLD')
+        mock_gen_manifests = mocker.patch(f'{self.CLASS}._generate_manifests')
 
         # Call function
         tst_hld_generator.generate()
@@ -47,6 +48,7 @@ class Test_HLD_Generator():
         mock_get_cd.assert_called_once()
         mock_get_matches.assert_called_once()
         mock_gen_HLD.assert_called_once()
+        mock_gen_manifests.assert_called_once()
 
     def test_get_cluster_components(self, mocker):
         """Test the _get_cluster_components method."""
