@@ -3,6 +3,7 @@ import pytest
 
 from hydrate.component import Component
 from hydrate.cluster import Cluster
+from hydrate.cluster import remove_default_namespaces
 from hydrate.cluster import get_first_word
 from hydrate.cluster import count_first_word
 from hydrate.cluster import sort_dict_by_value
@@ -57,7 +58,7 @@ class TestCluster():
             "hydrate.cluster.Cluster.get_namespaces",
             return_value=tst_namespaces)
         mock_remove_defaults = mocker.patch(
-            "hydrate.cluster.Cluster.remove_defaults",
+            "hydrate.cluster.remove_default_namespaces",
             return_value=tst_namespaces)
         mock_get_first_word = mocker.patch("hydrate.cluster.get_first_word")
         mock_get_namespaced_deployments = mocker.patch(
@@ -141,11 +142,10 @@ class TestCluster():
     @pytest.mark.parametrize("tst_namespaces, exp_namespaces",
                              [(tst_remove_defaults1, exp_remove_defaults1),
                               (tst_remove_defaults2, exp_remove_defaults2)])
-    def test_remove_defaults(self, cluster_connection,
-                             tst_namespaces, exp_namespaces):
-        """Test Cluster.remove_defaults function."""
-        mock_cluster = cluster_connection
-        assert mock_cluster.remove_defaults(tst_namespaces) == exp_namespaces
+    def test_remove_default_namespaces(self, cluster_connection,
+                                       tst_namespaces, exp_namespaces):
+        """Test remove_default_namespaces function."""
+        assert remove_default_namespaces(tst_namespaces) == exp_namespaces
 
 
 tst_string = "fabrikate-elasticsearch"
