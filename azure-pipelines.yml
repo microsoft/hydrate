@@ -30,7 +30,7 @@ steps:
     pip install pytest
     pip install pytest-azurepipelines
     pip install pytest-cov
-    pytest tests/ --cov hydrate --cov-report html
+    pytest tests/ --cov hydrate --cov-report xml
   displayName: 'Test with pytest'
 
 - script : |
