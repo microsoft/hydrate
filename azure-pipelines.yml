@@ -45,6 +45,14 @@ steps:
     python -m pyflakes tests/*.py
   displayName: 'CSE linting packages (pycodestyle, pydocstyle, pyflakes)'
 
+- task: Docker@2
+  inputs:
+    containerRegistry: 'hydrate-acr'
+    repository: 'hydrate'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+    tags: 'hydrate-$(Build.SourceBranchName)-$(Build.BuildId)'
+
 - task: PublishTestResults@2
   condition: succeededOrFailed()
   inputs:
