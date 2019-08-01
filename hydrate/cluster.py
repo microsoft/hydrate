@@ -37,7 +37,7 @@ class Cluster():
         components = []
         default_deployments = self.get_namespaced_deployments("default")
         namespaces = self.get_namespaces()
-        namespaces = self.remove_defaults(namespaces)
+        namespaces = remove_default_namespaces(namespaces)
         # Scenario where cluster applications live in namespaces
         if namespaces:
             first_words = [get_first_word(name) for name in namespaces]
@@ -112,19 +112,20 @@ class Cluster():
         comp_list = [Component(component[0]) for component in comp_list]
         return comp_list
 
-    def remove_defaults(self, namespaces):
-        """Remove the default and kubernetes namespaces.
 
-        Returns:
-            ret_list: list of namespaces
+def remove_default_namespaces(namespaces):
+    """Remove the default and kubernetes namespaces.
 
-        """
-        ret_list = []
-        ignore_set = {"default", "kube-public", "kube-system"}
-        for namespace in namespaces:
-            if namespace not in ignore_set:
-                ret_list.append(namespace)
-        return ret_list
+    Returns:
+        ret_list: list of namespaces
+
+    """
+    ret_list = []
+    ignore_set = {"default", "kube-public", "kube-system"}
+    for namespace in namespaces:
+        if namespace not in ignore_set:
+            ret_list.append(namespace)
+    return ret_list
 
 
 def get_first_word(string, delimiter="-"):
