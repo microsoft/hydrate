@@ -3,6 +3,7 @@
 import os
 from io import StringIO
 from ruamel.yaml import YAML
+from .cluster import remove_default_namespaces
 
 MAPPING = 2
 SEQUENCE = 4
@@ -41,6 +42,7 @@ def generate_manifests(namespaces=None, directory="manifests", dry_run=False):
 
     """
     if namespaces:
+        namespaces = remove_default_namespaces(namespaces)
         data = _create_namespaces_data(namespaces)
         if not dry_run:
             _make_directory(directory)
