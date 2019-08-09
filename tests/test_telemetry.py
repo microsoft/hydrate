@@ -1,16 +1,15 @@
 """Test suite for telemetry.py."""
 import pytest
 
-from hydrate.telemetry import Singleton
 from hydrate.telemetry import Telemetry
-from hydrate.telemetry import get_version
-from hydrate.telemetry import timeit_telemetry
 
 
 class TestTelemetry:
     """Test suite for the Telemetry class."""
+
     @pytest.mark.parametrize("tst_toggle", [(True), (False)])
     def test_init(self, mocker, tst_toggle):
+        """Test the Telemetry.__init__ method."""
         # Setup Test
         # Call Function
         tst_tele = Telemetry(tst_toggle)
@@ -31,6 +30,7 @@ class TestTelemetry:
                              [(test_event_name_1, test_event_prop_1, test_event_meas_1)])
     def test_track_event(self, mocker,
                          tst_event_name, tst_event_props, tst_event_meas):
+        """Test the Telemetry.track_event method."""
         # Setup Test
         tst_tele = Telemetry(True)
         tst_tele._telemetry_client.track_event = mocker.MagicMock()
@@ -51,14 +51,16 @@ class TestTelemetry:
     test_metric_max = 100
     test_metric_std_dev = 10
     test_metric_properties = {"test-prop-key": "test-prop-value"}
+
     @pytest.mark.parametrize("""tst_name, tst_value, tst_type, tst_count, tst_min,
                                 tst_max, tst_std_dev, tst_properties""",
-                                [(test_metric_name, test_metric_value, test_metric_type,
-                                  test_metric_count, test_metric_min, test_metric_max,
-                                  test_metric_std_dev, test_metric_properties)])
+                             [(test_metric_name, test_metric_value, test_metric_type,
+                               test_metric_count, test_metric_min, test_metric_max,
+                               test_metric_std_dev, test_metric_properties)])
     def test_track_metric(self, mocker,
                           tst_name, tst_value, tst_type, tst_count, tst_min, tst_max,
                           tst_std_dev, tst_properties):
+        """Test the Telemetry.track_metric method."""
         # Setup Test
         tst_tele = Telemetry(True)
         tst_tele._telemetry_client.track_metric = mocker.MagicMock()
@@ -75,6 +77,7 @@ class TestTelemetry:
         del tst_tele
 
     def test_flush(self, mocker):
+        """Test the Telemetry.flush method."""
         # Setup Test
         tst_tele = Telemetry(True)
         tst_tele._telemetry_client.flush = mocker.MagicMock()
@@ -86,13 +89,16 @@ class TestTelemetry:
         del tst_tele
 
     def test_setup_telemetry_channel(self, mocker):
+        """Test the Telemetry._setup_telemetry_channel method."""
         # Setup Test
         # Call Function
         # Assert Results
         # Delete Telemetry Instance
         pass
 
+
 def test_get_version():
+    """Test the get_version function."""
     # Setup Test
     # Call Function
     # Assert Results
@@ -100,6 +106,7 @@ def test_get_version():
 
 
 def test_timeit_telemetry():
+    """Test the timeit_telemetry decorator."""
     # Setup Test
     # Call Function
     # Assert Results
