@@ -5,6 +5,7 @@ from collections import namedtuple
 
 from hydrate.component import Component
 from hydrate.hld import HLD_Generator
+from hydrate.telemetry import Telemetry
 
 
 class Test_HLD_Generator():
@@ -57,6 +58,7 @@ class Test_HLD_Generator():
         mock_cluster = mocker.patch.object(tst_hld_generator, 'cluster')
         mock_cluster.connect_to_cluster = mocker.MagicMock()
         mock_cluster.get_components = mocker.MagicMock()
+        test_telemetry = Telemetry(True)
 
         # Call function
         tst_hld_generator._get_cluster_components()
@@ -65,12 +67,16 @@ class Test_HLD_Generator():
         mock_cluster.connect_to_cluster.assert_called_once()
         mock_cluster.get_components.assert_called_once()
 
+        # Delete Telemetry Instance
+        del test_telemetry
+
     def test_get_component_definitions(self, mocker):
         """Test the _get_component_definitions method."""
         # Setup, mock, etc.
         tst_hld_generator = HLD_Generator(self.tst_args)
         mock_scraper = mocker.patch(f'{self.MODULE}.Scraper')
         mock_scraper.return_value.get_repo_components = mocker.MagicMock()
+        test_telemetry = Telemetry(True)
 
         # Call function
         tst_hld_generator._get_component_definitions()
@@ -79,6 +85,9 @@ class Test_HLD_Generator():
         mock_scraper.assert_called_once()
         mock_scraper.return_value.get_repo_components.assert_called_once()
 
+        # Delete Telemetry Instance
+        del test_telemetry
+
     def test_get_matches(self, mocker):
         """Test the _get_matches method."""
         # Setup, mock, etc.
@@ -86,12 +95,16 @@ class Test_HLD_Generator():
         tst_cc = [Component("Test-Component")]
         mock_matcher = mocker.patch.object(tst_hld_generator, 'matcher')
         mock_matcher.match_components = mocker.MagicMock()
+        test_telemetry = Telemetry(True)
 
         # Call function
         tst_hld_generator._get_matches(tst_cc)
 
         # Assert results
         mock_matcher.match_components.assert_called_once()
+
+        # Delete Telemetry Instance
+        del test_telemetry
 
     tst_args_1 = tst_args(dry_run=True,
                           name=None, kubeconfig=None, output=None, verbose=None)
@@ -112,6 +125,7 @@ class Test_HLD_Generator():
                                               return_value=tst_data)
         mock_dump_yaml = mocker.patch(f'{self.CLASS}.dump_yaml',
                                       return_value=None)
+        test_telemetry = Telemetry(True)
 
         # Call function
         tst_hld_generator._generate_HLD(tst_match_categories)
@@ -121,6 +135,9 @@ class Test_HLD_Generator():
         if tst_args.dry_run:
             mock_dump_yaml.assert_called_with(tst_data, mock_stdout)
         mock_dump_yaml.assert_called_once()
+
+        # Delete Telemetry Instance
+        del test_telemetry
 
     def test_set_subcomponents(self):
         """Test the _set_subcomponents method."""
