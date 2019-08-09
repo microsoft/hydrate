@@ -14,7 +14,7 @@ pip install -r requirements.txt
 
 ## Basic Usage
 ```bash
-python -m hydrate [-h] [-n NAME] [-k FILE] [-o PATH] [-v] [-d] run
+python -m hydrate [-h] [-n NAME] [-k FILE] [-o PATH] [-v] [-d] [-t] run
 ```
 The component.yaml file that is created is based on the specification detailed in the [Fabrikate](https://github.com/Microsoft/fabrikate "Fabrikate") repo.
 
@@ -40,6 +40,7 @@ Arg | Usage
 -o PATH, --output PATH | Output path for the generated component.yaml.
 -v, --verbose | Verbose output logs.
 -d, --dry-run | Print component.yaml to the terminal.
+-t, --telemetry | Enable telemetry collection (default: Disabled)
 
 ## Running in Docker
 ### Step 1. Build The Image
@@ -51,6 +52,17 @@ docker build --tag=[image-name] .
 ```bash
 docker run [image-name] [args]
 ```
+
+## Telemetry
+Telemetry is disabled by default, but can be enabled by supplying the -t argument when running hydrate.
+
+The following data is collected and sent to AppInsights:
+- Each time Hydrate is run
+- The runtime of Hydrate
+- The runtime of functions decorated with @timeit_telemetry
+- The content and number of Full Matches
+- The content and number of Partial Matches
+- The number of No Matches
 
 # Contributing
 
