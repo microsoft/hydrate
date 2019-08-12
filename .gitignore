@@ -4,3 +4,5 @@ apikey
 kubeconfig*
 tmp
 __pycache__
+/out
+/manifests
