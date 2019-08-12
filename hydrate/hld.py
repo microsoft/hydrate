@@ -82,10 +82,11 @@ class HLD_Generator():
                 verbose_print("Writing component.yaml to {}".format(self.output))
                 output_file = os.path.join(self.output, "component.yaml")
             else:
-                # File Written just outside the hydrate directory?
-                path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                # Default: file written to an /out folder outside of the hydrate module
+                path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "out")
+                os.makedirs(path, exist_ok =True)
                 verbose_print("Writing component.yaml to {}".format(path))
-                output_file = "component.yaml"
+                output_file = os.path.join(path, "component.yaml")
             with open(output_file, 'w') as of:
                 self.dump_yaml(data, of)
 

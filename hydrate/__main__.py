@@ -41,7 +41,7 @@ def parse_args(args):
     parser.add_argument(
         '-o', '--output',
         action='store',
-        default=os.getcwd(),
+        default='',
         help='Output path for the generated component.yaml.',
         metavar='PATH')
     parser.add_argument(
