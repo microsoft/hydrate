@@ -11,12 +11,14 @@ from hydrate.manifest import _generate_namespaces_yaml
 
 MODULE = "hydrate.manifest"
 
+
 def test_NamespaceYAML():
     """Test the NamespaceYAML class."""
     tst_data = NamespaceYAML("Test Namespace")
     assert tst_data.apiVersion == "v1"
     assert tst_data.kind == "Namespace"
     assert tst_data.metadata["name"] == "Test Namespace"
+
 
 tst_dry_run = [True, False]
 @pytest.mark.parametrize('dry_run', tst_dry_run)
@@ -39,7 +41,6 @@ def test_generate_manifests(mocker, dry_run):
     if not dry_run:
         mock_make_directory.assert_called_with("manifests")
         mock_open.assert_called_once()
-
 
 
 def test_make_directory(mocker):

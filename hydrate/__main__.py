@@ -10,14 +10,10 @@ import os
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
+from timeit import default_timer
 
 from .hld import HLD_Generator
-
-
-def main(args):
-    """Generate the HLD for the cluster."""
-    hydrator = HLD_Generator(args)
-    hydrator.generate()
+from .telemetry import Telemetry
 
 
 def parse_args(args):
@@ -52,10 +48,35 @@ def parse_args(args):
         '-d', '--dry-run',
         action='store_true',
         help='Print component.yaml to the terminal.')
+    parser.add_argument(
+        '-t', '--telemetry',
+        action='store_true',
+        default=False,
+        help='Enable telemetry data collection.')
 
     return parser.parse_args(args)
 
 
-if __name__ == '__main__':
+def main():
+    """Generate the HLD for the cluster."""
     args = parse_args(sys.argv[1:])
-    main(args)
+
+    # Enable/Disable telemetry based on argument. Default: Disabled
+    telemetry = Telemetry(args.telemetry)
+
+    start_time = default_timer()
+
+    # Generates HLD and manifests directory.
+    hydrator = HLD_Generator(args)
+    hydrator.generate()
+
+    runtime = default_timer() - start_time
+
+    telemetry.track_event("Hydrate executed")
+    telemetry.track_metric("Hydrate runtime", runtime)
+    print(f"Hydrate runtime: {runtime}")
+    telemetry.flush()
+
+
+if __name__ == '__main__':
+    main()

@@ -7,14 +7,25 @@ from hydrate.__main__ import parse_args
 def test_main(mocker):
     """Test the main function."""
     # Setup mock, test objects, etc.
-    tst_args = "test-args"
+    mock_parse_args = mocker.patch('hydrate.__main__.parse_args')
+    mock_telemetry = mocker.patch('hydrate.__main__.Telemetry')
+    mock_telemetry.return_value.track_event = mocker.MagicMock()
+    mock_telemetry.return_value.track_metric = mocker.MagicMock()
+    mock_telemetry.return_value.flush = mocker.MagicMock()
+    mock_default_timer = mocker.patch('hydrate.__main__.default_timer')
     mock_HLD_Generator = mocker.patch('hydrate.__main__.HLD_Generator')
     mock_HLD_Generator.return_value.generate = mocker.MagicMock()
 
     # Call the function
-    main(tst_args)
+    main()
 
     # Assert the results
+    mock_parse_args.assert_called_once()
+    mock_telemetry.assert_called_once()
+    mock_telemetry.return_value.track_event.assert_called_once()
+    mock_telemetry.return_value.track_metric.assert_called_once()
+    mock_telemetry.return_value.flush.assert_called_once()
+    mock_default_timer.assert_called()
     mock_HLD_Generator.assert_called_once()
     mock_HLD_Generator.return_value.generate.assert_called_once()
 

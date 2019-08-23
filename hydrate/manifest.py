@@ -55,6 +55,7 @@ def generate_manifests(namespaces=None, directory="manifests", dry_run=False):
             _generate_namespaces_yaml(data, of)
             of.seek(0)
             print(of.read())
+
     else:
         raise Exception("Namespaces are None")
 

@@ -1,11 +1,11 @@
 """Provide class to match cluster objects with Fabrikate component definitions."""
-
 from enum import Enum
 from collections import namedtuple
 from .component import CommentedComponent
 from .comments import FULL_MATCH_COMMENT
 from .comments import PARTIAL_MATCH_COMMENT
 from .comments import NO_MATCH_COMMENT
+from .telemetry import Telemetry
 
 
 class Matcher():
@@ -46,6 +46,9 @@ class Matcher():
                               start_index=self.get_start_index(),
                               matches=FullMatchResults.full_matches))
 
+            send_match_name_telemetry(FullMatchResults.full_matches, "Full Matches")
+            send_match_number_telemetry(FullMatchResults.full_matches, "Full Matches")
+
         if FullMatchResults.leftovers:
             PartialMatchResults = self.get_partial_matches(FullMatchResults.leftovers)
 
@@ -55,6 +58,11 @@ class Matcher():
                                   start_index=self.get_start_index(),
                                   matches=PartialMatchResults.partial_matches))
 
+                send_match_name_telemetry(PartialMatchResults.partial_matches,
+                                          "Partial Matches")
+                send_match_number_telemetry(PartialMatchResults.partial_matches,
+                                            "Partial Matches")
+
             if PartialMatchResults.no_matches:
                 NoMatchResults = self.get_no_matches(PartialMatchResults.no_matches)
 
@@ -62,6 +70,8 @@ class Matcher():
                     MatchCategory(top_comment=NO_MATCH_COMMENT,
                                   start_index=self.get_start_index(),
                                   matches=NoMatchResults))
+
+                send_match_number_telemetry(NoMatchResults, "No Matches")
 
         return self.match_categories
 
@@ -191,3 +201,27 @@ class Match():
                                       component=self.repo_match)
         if self.category == MatchCategory.NO_MATCH:
             return self.cluster_matches
+
+
+def send_match_name_telemetry(matches, match_type):
+    """Send telemetry of the names of matches found."""
+    TELEMETRY = Telemetry(None)
+
+    match_string = namedtuple("match_string", ["cluster_matches", "repo_match"])
+    match_strings = []
+    for m in matches:
+        cluster_match_names = []
+        for cc in m.cluster_matches:
+            cluster_match_names.append(cc.name)
+        repo_match_name = m.repo_match.name
+        match_strings.append(match_string(cluster_match_names, repo_match_name))
+
+    for match in match_strings:
+        TELEMETRY.track_event(match_type, {"cluster_match_names": match.cluster_matches,
+                                           "repo_match_name": match.repo_match})
+
+
+def send_match_number_telemetry(matches, match_type):
+    """Send telemetry of the number of matches found."""
+    TELEMETRY = Telemetry(None)
+    TELEMETRY.track_metric(f"# of {match_type}", len(matches))

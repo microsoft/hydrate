@@ -5,6 +5,7 @@ from .component import TopComponent
 from .scrape import Scraper
 from .manifest import generate_manifests
 from .match import Matcher
+from .telemetry import timeit_telemetry
 
 from sys import stdout
 import os.path
@@ -39,16 +40,18 @@ class HLD_Generator():
         """Generate the component.yaml."""
         # Step 1a. Get cluster components
         cluster_components = self._get_cluster_components()
-        # Step 1b. Get repo components, instantiate matcher
+        # Step 1b. Get repo components
         repo_components = self._get_component_definitions()
+        # Step 2. Instantiate matcher
         self.matcher = Matcher(repo_components)
-        # Step 2. Find the matches between the cluster and repo
+        # Step 3. Find the matches between the cluster and repo
         match_categories = self._get_matches(cluster_components)
         # Step 3. Generate the HLD
         self._generate_HLD(match_categories)
         # Step 4. Generate the manifests directory
         self._generate_manifests()
 
+    @timeit_telemetry
     def _get_cluster_components(self):
         """Get objects living on the cluster."""
         print("Connecting to cluster...")
@@ -57,17 +60,20 @@ class HLD_Generator():
         print("Collecting information from the cluster...")
         return self.cluster.get_components()
 
+    @timeit_telemetry
     def _get_component_definitions(self):
         """Get component definitions from the Fabrikate-Definitions repository."""
         print("Collecting Fabrikate Component Definitions from GitHub...")
         scraper = Scraper()
         return scraper.get_repo_components()
 
+    @timeit_telemetry
     def _get_matches(self, cluster_components):
         """Get MatchCategories from the Matcher."""
         print("Comparing Cluster Deployments to Fabrikate Definitions...")
         return self.matcher.match_components(cluster_components)
 
+    @timeit_telemetry
     def _generate_HLD(self, match_categories):
         """Manipulate the MatchCategories into yaml."""
         verbose_print("Appending subcomponents to the main component...")
@@ -126,6 +132,7 @@ class HLD_Generator():
         data['subcomponents'] = temp_list
         return data
 
+    @timeit_telemetry
     def _generate_manifests(self):
         """Generate the manifests."""
         namespaces = self.cluster.get_namespaces()
