@@ -47,11 +47,11 @@ steps:
 
 - task: Docker@2
   inputs:
-    containerRegistry: 'hydrate-acr'
-    repository: 'hydrate'
+    containerRegistry: 'devcrewsacr'
+    repository: 'public/k8s/bedrock/hydrate'
     command: 'buildAndPush'
     Dockerfile: '**/Dockerfile'
-    tags: 'hydrate-$(Build.SourceBranchName)-$(Build.BuildId)'
+    tags: 'latest'
 
 - task: PublishTestResults@2
   condition: succeededOrFailed()
