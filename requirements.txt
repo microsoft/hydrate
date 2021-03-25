@@ -19,7 +19,7 @@ pyparsing==2.4.0
 pytest==4.6.3
 pytest-mock==1.10.4
 python-dateutil==2.8.0
-PyYAML==5.1.1
+PyYAML==5.4
 requests==2.22.0
 requests-oauthlib==1.2.0
 rsa==4.0
